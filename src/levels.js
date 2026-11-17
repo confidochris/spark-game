@@ -30,13 +30,13 @@ export const LEVELS = [
   {
     id: 'seed',
     stage: 'SEED',
-    name: 'A Promising Idea',
+    name: 'The First Spark',
     par: 30,
-    tip: 'Find the 2 discoveries hidden in the fog, then reach the keyhole.',
+    tip: 'Pool two gold gifts to power a beacon. Find both keys and reach the keyhole.',
     light: { start: 160, max: 160, min: 160, fadePerSecond: 0 }, // level 1: no drain
     map: [
       '###########',
-      '#S....#...#',
+      '#S.$..#...#',
       '#.###.#.#.#',
       '#...#...#K#',
       '###.#####.#',
@@ -46,7 +46,7 @@ export const LEVELS = [
       '#.#.#.###.#',
       '#...#...#$#',
       '#.#####.#.#',
-      '#$.....E#.#',
+      '#......E#.#',
       '###########',
     ],
     story: {
@@ -99,7 +99,7 @@ export const LEVELS = [
     stage: 'TESTING',
     name: 'Putting It to the Test',
     par: 45,
-    tip: 'More Static now, and faster. Each touch costs a heart.',
+    tip: 'Find a key to sample the signals. Test which pattern repeats.',
     light: { fadePerSecond: 4.0 }, // about 31 s
     staticSpeed: 3.0,
     map: [

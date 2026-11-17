@@ -1,3 +1,4 @@
+import { researchCheckpoint } from '../ui/researchCheckpoint.js';
 import { sized } from '../systems/textures.js';
 // ============================================================================
 //  PlayScene.js: one level of the game
@@ -50,6 +51,7 @@ export class PlayScene extends Phaser.Scene {
     this.score = 0;
     this.dotsEaten = 0;
     this.giftsFound = 0;
+    this.beaconLit = false;
     this.cluesFound = 0;
     this.dotCombo = 0;
     this.lastDotTime = 0;
@@ -311,6 +313,7 @@ export class PlayScene extends Phaser.Scene {
     if (this.state === 'playing') {
       player.hold(this.heldDirection());
       player.update(dt);
+      if (this.state === 'observing') return;
 
       if (player.moved) {
         this.elapsed += dt;
@@ -382,6 +385,10 @@ export class PlayScene extends Phaser.Scene {
       this.burst(p.x, p.y, COLORS.gold, 14);
       this.floatText(p.x, p.y - 18, '+ LIGHT', CSS.gold);
       Sound.gift();
+      if (this.level.id === 'seed' && this.giftsFound === 2) {
+        this.beaconLit = true;
+        this.observe();
+      }
     }
 
     // Discovery
@@ -397,12 +404,30 @@ export class PlayScene extends Phaser.Scene {
       this.floatText(p.x, p.y - 20, `DISCOVERY ${this.cluesFound}/${this.totalClues}`, CSS.lime);
       Sound.discovery();
       this.openGates();
-      if (this.cluesFound >= this.totalClues) this.unlockExit();
+      if (this.level.id === 'test' && this.cluesFound === 1) this.observe();
+      if (this.cluesFound >= this.totalClues && (this.level.id !== 'seed' || this.beaconLit)) this.unlockExit();
     }
 
     // The keyhole
     const e = this.maze.exit;
     if (e.open && x === e.x && y === e.y) this.win();
+  }
+
+  observe() {
+    this.touch.release();
+    this.padDir = null;
+    this.state = 'observing';
+    this.scene.pause();
+    researchCheckpoint(this.level.id, () => {
+      this.state = 'playing';
+      this.scene.resume();
+      const target = this.maze.clues.find(c => !c.taken) || this.maze.exit;
+      const point = this.maze.toPixel(target.x, target.y);
+      this.fog.reveal(point.x, point.y, this.lightCfg.max);
+      this.burst(point.x, point.y, COLORS.gold, 20);
+      if (this.cluesFound === this.totalClues) this.unlockExit();
+      else this.toast('BEACON ONLINE • A NEW AREA IS LIT');
+    });
   }
 
   openGates() {

@@ -24,3 +24,35 @@ canvas {
   display: block;
   outline: none;
 }
+
+.research-station {
+  box-sizing: border-box;
+  width: min(92vw, 420px);
+  max-height: 88dvh;
+  overflow-y: auto;
+  touch-action: pan-y;
+  padding: clamp(16px, 4vw, 28px);
+  border: 2px solid #e8bc53;
+  border-radius: 18px;
+  background: #102c22;
+  color: #fff8e6;
+  font: 1rem/1.45 system-ui, sans-serif;
+}
+.research-station::backdrop { background: #04130fde; }
+.research-station h2 { margin: 0 0 .6em; color: #ffe19c; }
+.research-station img { width: 66px; vertical-align: middle; margin-right: .5rem; }
+.research-station button, .research-station a {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: .5rem;
+  padding: .65rem;
+  border: 1px solid #82ac91;
+  border-radius: .65rem;
+  background: #184335;
+  color: white;
+  text-align: center;
+  font: inherit;
+  cursor: pointer;
+}
+.research-station button:disabled { opacity: .55; }
