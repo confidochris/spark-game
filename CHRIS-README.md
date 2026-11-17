@@ -5,12 +5,12 @@ Your gold dot is now a full game. It has six levels, a title screen, stars, soun
 ## New in version 2
 
 - **Play as Chris or Shelley.** Pick a face the first time you press START, or later with the **PLAYER** button on the title screen. The face replaces the gold dot, with a gold glow and rim, and it bobs gently as it moves. Your ghost uses the same face, see-through.
-- **3 lives (hearts).** Touching Static or running out of light costs a heart. Spark flashes and goes back to the level's start. At 0 hearts you get a **Try again** screen, and the level starts over.
+- **3 lives (hearts).** Touching Static or running out of light costs a heart. Spark flashes and goes back to the level's start. At 0 hearts you get a **Try again** screen, and can start a new run.
 - **Harder from level 2.** The light really runs out now. Level 2 adds the first slow Static and a Closing Door. Levels 3 to 6 add more and faster Static, and their par times are tighter. Level 1 is still easy.
 - **Sharp graphics.** The game now draws at your screen's real resolution (Retina too), so text, icons and faces stay crisp.
 - **Calm mode** still exists for a gentler game: unlimited lives, slower Static, and light that never runs out.
 
-**Why found discoveries stay found after you lose a heart:** losing a heart sends you back to the start, and the clock keeps running, which is already a real cost. Taking away discoveries too would make one slip on a big level like 5 or 6 feel like starting over. When you run out of hearts, the whole level resets anyway.
+**Why found discoveries stay found after you lose a heart:** losing a heart sends you back to the start, and the clock keeps running, which is already a real cost. Taking away discoveries too would make one slip on a big level like 5 or 6 feel like starting over. When you run out of hearts, the run ends.
 
 This guide covers:
 1. Putting the new files into your `spark-game` folder
@@ -96,7 +96,7 @@ You're **Spark**, a point of light exploring a research maze hidden in fog.
 
 - **Goal:** find every **discovery** (the lime keys). Each one restores your light. Once you have them all, the gold **keyhole** unlocks. Reach it to finish the level.
 - **Light:** from level 2 on, your glow drains as you explore. If you stand around without picking anything up, it runs out in about 25 to 35 seconds, depending on the level, and you lose a heart. **Gold gifts ($)** brighten it again, and a **discovery** fills it back up. When the light gets low, the meter turns red and flashes, and a "LOW LIGHT" warning appears.
-- **Hearts:** you have 3 per level. Losing one sends you back to the level start with full light and 2 seconds of flashing protection. Discoveries and gifts you've already found stay found. At 0 hearts you get **Try again**.
+- **Hearts:** you start a run with 3 and carry them between levels. Losing one sends you back to the level start with full light and 2 seconds of flashing protection. Discoveries and gifts you've already found stay found. At 0 hearts you get **Try again**.
 - **Data dots** (blue) add points.
 - **Static** (flickering specks) is noisy data. Touching it costs a heart. In Calm mode it just dims your light and pushes you back.
 - **Closing Doors** (gold stripes) open and shut on a timer, and the number shows the seconds left. They never close on top of you.

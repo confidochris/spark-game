@@ -63,7 +63,7 @@ export const PLAYER = {
 // the defaults. From level 2 on the glow drains, and if it shrinks to
 // "outAt" Spark runs out of light and loses a life.
 //   Seconds of light with no pickups = (start - outAt) / fadePerSecond
-//   e.g. level 2: (150 - 26) / 3.5 = about 35 seconds
+//   e.g. level 2: (150 - 26) / 6 = about 21 seconds
 // To make the game easier, lower fadePerSecond in levels.js (or raise
 // giftRefill here). To make it harder, raise fadePerSecond.
 export const LIGHT = {
@@ -86,7 +86,7 @@ export const LIGHT = {
 // to the level start; discoveries and gifts you already found stay found.
 // At 0 hearts the level restarts ("Try again").
 export const LIVES = {
-  start: 3, // hearts at the start of each level
+  start: 3, // hearts at the start of a run
   invulnerableTime: 2.0, // seconds Spark flashes and can't be hurt after losing a life
   respawnDelay: 0.7, // seconds of pause before Spark reappears at the start
   calmUnlimited: true, // Calm mode: no hearts, Static just pushes you back
@@ -103,6 +103,8 @@ export const FACE_SIZE = 38; // how big the face is in the maze (a square is 40)
 
 // ---- Hazards -------------------------------------------------------------------
 export const HAZARDS = {
+  surgeSeconds: 4,
+  returnSeconds: 7,
   staticSpeed: 3.0, // Static blobs move this many squares per second (levels.js can override)
   calmHazardFactor: 0.6, // in Calm mode, hazards and doors run 40% slower
   doorOpenTime: 3.5, // seconds a Closing Door stays open

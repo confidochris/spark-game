@@ -42,7 +42,7 @@ export function researchCheckpoint(level, resume) {
   portrait.src = import.meta.env.BASE_URL + 'characters/andersen.webp';
   portrait.alt = 'Illustrated portrait of Dr. Andersen';
   add('strong', 'Dr. Andersen · Research checkpoint');
-  add('p', 'In mental health research, testing an observation again can help separate a pattern from chance. Compare the readings from two stations.');
+  add('p', 'In mental illness research, testing an observation again can help separate a pattern from chance. Compare the readings from two stations.');
   const repeat = Math.floor(Math.random() * 3);
   const symbols = ['◆ ○ ◆', '○ ◆ ○', '◆ ◆ ○'];
   const feedback = add('p', 'Select the signal that repeated at both stations.');

@@ -6,10 +6,11 @@
 //  To wipe progress while testing, open the browser console and run:
 //      localStorage.removeItem('spark-game-save-v1')
 // ============================================================================
-import { SAVE_KEY } from '../config.js';
+import { SAVE_KEY, LIVES } from '../config.js';
 
 const DEFAULTS = {
   version: 2,
+  run: null,
   unlocked: 1, // how many levels are open (1 = only the first)
   levels: {}, // per level id: { stars, bestTime, bestScore, ghost }
   settings: { muted: false, calm: false, ghost: true, character: null },
@@ -48,6 +49,35 @@ function persist() {
 }
 
 export const Save = {
+  get runLives() {
+    return data.run?.lives ?? LIVES.start;
+  },
+
+  claimedHeart(id) {
+    return data.run?.hearts.includes(id) ?? false;
+  },
+
+  collectHeart(id) {
+    if (this.claimedHeart(id)) return;
+    data.run ??= { lives: LIVES.start, hearts: [] };
+    data.run.hearts.push(id);
+    data.run.lives++;
+    persist();
+  },
+
+  loseHeart() {
+    data.run ??= { lives: LIVES.start, hearts: [] };
+    const left = --data.run.lives;
+    if (left === 0) data.run = null;
+    persist();
+    return left;
+  },
+
+  finishRun() {
+    data.run = null;
+    persist();
+  },
+
   get unlocked() {
     return data.unlocked;
   },

@@ -64,14 +64,14 @@ export const LEVELS = [
     stage: 'PILOT',
     name: 'The First Investment',
     par: 40,
-    tip: 'Your light drains now! Grab gold gifts. Dodge the Static, time the door.',
-    light: { fadePerSecond: 3.5 }, // about 35 s of light without pickups
+    tip: 'Gold gifts refill light. Grab a key, then tag Static before your surge ends.',
+    light: { fadePerSecond: 6 },
     staticSpeed: 2.2, // slow: the first Static
     map: [
       '#############',
       '#S..#.....#$#',
       '###.#.###.#.#',
-      '#...#.#K#...#',
+      '#...#.#K#..H#',
       '#.###.#.###.#',
       '#.....#.....#',
       '#####.#####C#',
@@ -100,7 +100,7 @@ export const LEVELS = [
     name: 'Putting It to the Test',
     par: 45,
     tip: 'Find a key to sample the signals. Test which pattern repeats.',
-    light: { fadePerSecond: 4.0 }, // about 31 s
+    light: { fadePerSecond: 6.8 },
     staticSpeed: 3.0,
     map: [
       '#############',
@@ -137,7 +137,7 @@ export const LEVELS = [
     name: 'A New Discovery',
     par: 48,
     tip: 'Doors and Static together now. Time your dash, or take the long way.',
-    light: { fadePerSecond: 4.3 }, // about 29 s
+    light: { fadePerSecond: 7.4 },
     staticSpeed: 3.3,
     map: [
       '###################',
@@ -153,7 +153,7 @@ export const LEVELS = [
       '#####C#.###.#.###C#',
       '#$....#.#K#...#...#',
       '#.###.#.#.#####.#.#',
-      '#...#...#.......#E#',
+      '#H..#...#.......#E#',
       '###################',
     ],
     story: {
@@ -172,15 +172,15 @@ export const LEVELS = [
     name: 'Greater Impact',
     par: 72,
     tip: 'Numbered gates open when you hold that many discoveries.',
-    light: { fadePerSecond: 4.6 }, // about 27 s
+    light: { fadePerSecond: 8 },
     staticSpeed: 3.6,
     map: [
       '#####################',
       '#S....#.......#....K#',
-      '#.###.#.#####.#.###.#',
-      '#.#...#...#.....#...#',
+      '#.#...#.#####.#.###.#',
+      '#.........#.....#...#',
       '#.#.#####.#.#####.#.#',
-      '#$#.......#...N.....#',
+      '#$............N.....#',
       '###########1#########',
       '#.....#.......#....$#',
       '#.###.#.#####.#.###.#',
@@ -211,7 +211,7 @@ export const LEVELS = [
     name: 'The Next Question',
     par: 50,
     tip: 'The keyhole waits in the center. Find all 4 discoveries to open the way.',
-    light: { fadePerSecond: 5.0 }, // about 25 s
+    light: { fadePerSecond: 8.5 },
     staticSpeed: 3.9,
     map: [
       '###################',
@@ -219,11 +219,11 @@ export const LEVELS = [
       '#.###.#.###.#.###.#',
       '#.#.....#..N..#...#',
       '#.#.###.#.###.#.#.#',
-      '#...#.N.....#...#.#',
+      '#...#.N.....#...#H#',
       '###.#.#######.###.#',
       '#$..#.#.....#.#...#',
       '#.###.#.###.#.#.###',
-      '#.....C.#E4.C.....#',
+      '#.....C.#E4.C..N..#',
       '#.###.#.#####.#.#.#',
       '#K#...#.......#.#$#',
       '#.#.#.#########.#.#',

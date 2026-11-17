@@ -109,7 +109,7 @@ export class TitleScene extends Phaser.Scene {
     const s = Save.settings;
     const lines = [];
     if (s.calm) lines.push('Calm mode: unlimited lives, slower Static, and light never runs out.');
-    else lines.push('Calm mode slows everything down. Ghost shows your best route.');
+    else lines.push('Three hearts for the run. Find heart pickups to earn extra lives.');
     this.help.setText(lines.join(' '));
   }
 

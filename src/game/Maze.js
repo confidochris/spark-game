@@ -6,6 +6,7 @@ import { RES } from '../systems/layout.js';
 //  It also answers questions the other pieces ask, like
 //  "can Spark move into square (x, y) right now?"
 // ============================================================================
+import { Save } from '../systems/save.js';
 import { TILE } from '../config.js';
 
 // The four directions, as steps in x and y.
@@ -31,6 +32,7 @@ export class Maze {
     this.dots = new Map(); // "x,y" -> image
     this.gifts = []; // { x, y, sprite }
     this.clues = []; // { x, y, sprite }
+    this.hearts = new Map();
     this.staticStarts = []; // { x, y }
     this.doors = []; // Closing Doors: { x, y, ... }
     this.gates = []; // numbered gates: { x, y, need, open, ... }
@@ -123,6 +125,13 @@ export class Maze {
             const sprite = s.add.image(p.x, p.y, 'clue').setDepth(3);
             s.tweens.add({ targets: sprite, scale: 1.12, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
             this.clues.push({ x, y, sprite });
+            break;
+          }
+          case 'H': {
+            const key = this.key(x, y);
+            if (!s.unlimitedLives && !Save.claimedHeart(s.level.id + key)) {
+              this.hearts.set(key, sized(s.add.image(p.x, p.y, 'heart').setDepth(3), 28));
+            }
             break;
           }
           case 'N':
