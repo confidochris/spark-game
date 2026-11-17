@@ -1,4 +1,5 @@
 // Choose a face. The setting is shared by the player and the ghost.
+import { challenge } from '../fieldwork.js';
 import Phaser from 'phaser';
 import { CHARACTERS, CSS, COLORS } from '../config.js';
 import { Save } from '../systems/save.js';
@@ -39,7 +40,7 @@ export class CharacterSelectScene extends Phaser.Scene {
     Save.setSetting('character', id);
     Sound.unlock(); Sound.click();
     if (this.returnTo) this.scene.start(this.returnTo);
-    else if (Save.unlocked <= 1 && !Save.level('seed')) this.scene.start('Play', { levelIndex: 0 });
+    else if (challenge || (Save.unlocked <= 1 && !Save.level('seed'))) this.scene.start('Play', { levelIndex: 0 });
     else this.scene.start('LevelSelect');
   }
 }

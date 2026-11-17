@@ -1,3 +1,4 @@
+import { beginStudy, choice, recordPath } from '../fieldwork.js';
 import { researchCheckpoint } from '../ui/researchCheckpoint.js';
 import { sized } from '../systems/textures.js';
 // ============================================================================
@@ -61,6 +62,12 @@ export class PlayScene extends Phaser.Scene {
     // Light settings: the level's own values, falling back to config.js
     this.lightCfg = { ...LIGHT, ...(level.light || {}) };
     this.light = this.lightCfg.start;
+    if (this.levelIndex === 0) beginStudy();
+    this.trail = new Map();
+    if (this.levelIndex === 1) {
+      if (choice(0)) this.lightCfg.fadePerSecond *= 0.70;
+      else { this.lightCfg.start += 38; this.lightCfg.max += 38; this.light = this.lightCfg.start; }
+    }
     this.lightShown = this.light;
 
     // Seeded randomness, so Static moves the same way each attempt
@@ -72,6 +79,18 @@ export class PlayScene extends Phaser.Scene {
     this.totalClues = this.maze.clues.length;
     this.totalGifts = this.maze.gifts.length;
     this.buildExit();
+    this.trail.set('start', [this.maze.start.x, this.maze.start.y]);
+    this.sampleDelay = 0;
+    this.fieldStep = 0;
+    this.station = null;
+    const stations = {
+      test: [this.maze.start, choice(1) ? this.maze.gifts[0] : this.maze.start],
+      discovery: [this.maze.clues[0], choice(2) ? this.maze.clues[1] : this.maze.clues[0]],
+      impact: [choice(3) ? this.maze.gifts[1] : this.maze.gifts[0]],
+      next: [choice(4) ? this.maze.clues.at(-1) : this.maze.gifts[0]],
+    };
+    this.fieldSites = stations[level.id] || [];
+    if (this.fieldSites.length) this.markStation();
 
     this.player = new Player(this, this.maze, this.maze.start.x, this.maze.start.y);
     if (this.calm) this.player.speed *= PLAYER.calmSpeedFactor;
@@ -308,6 +327,7 @@ export class PlayScene extends Phaser.Scene {
     const player = this.player;
 
     if (this.state === 'playing') {
+      this.sampleDelay = Math.max(0, this.sampleDelay - dt);
       this.surge = Math.max(0, this.surge - dt);
       player.hold(this.heldDirection());
       player.update(dt);
@@ -357,6 +377,9 @@ export class PlayScene extends Phaser.Scene {
   onArrive(x, y) {
     const key = this.maze.key(x, y);
     const p = this.maze.toPixel(x, y);
+
+    this.trail.set(key, [x,y]);
+    this.readStation(x,y);
 
     // Data dot
     const dot = this.maze.dots.get(key);
@@ -415,7 +438,7 @@ export class PlayScene extends Phaser.Scene {
       Sound.discovery();
       this.openGates();
       if (this.level.id === 'test' && this.cluesFound === 1) this.observe();
-      if (this.cluesFound >= this.totalClues && (this.level.id !== 'seed' || this.beaconLit)) this.unlockExit();
+      if (this.cluesFound >= this.totalClues && this.fieldStep === this.fieldSites.length && (this.level.id !== 'seed' || this.beaconLit)) this.unlockExit();
     }
 
     // The keyhole
@@ -435,9 +458,34 @@ export class PlayScene extends Phaser.Scene {
       const point = this.maze.toPixel(target.x, target.y);
       this.fog.reveal(point.x, point.y, this.lightCfg.max);
       this.burst(point.x, point.y, COLORS.gold, 20);
-      if (this.cluesFound === this.totalClues) this.unlockExit();
+      if (this.cluesFound === this.totalClues && this.fieldStep === this.fieldSites.length) this.unlockExit();
       else this.toast('BEACON ONLINE • A NEW AREA IS LIT');
     });
+  }
+
+  markStation() {
+    this.station?.destroy();
+    const site = this.fieldSites[this.fieldStep];
+    if (!site) return;
+    const p = this.maze.toPixel(site.x, site.y);
+    this.station = this.add.circle(p.x, p.y, 18, COLORS.sky, 0.18).setStrokeStyle(3, COLORS.sky).setDepth(11);
+    if (this.level.id === 'next') this.lightCfg.giftRefill += 15;
+  }
+
+  readStation(x, y) {
+    const site = this.fieldSites[this.fieldStep];
+    if (!site || x !== site.x || y !== site.y) return;
+    if (this.sampleDelay > 0) {
+      this.toast('RECALIBRATING • RETURN IN ' + Math.ceil(this.sampleDelay) + 's');
+      return;
+    }
+    this.fieldStep++;
+    if (this.fieldSites[this.fieldStep] === site) this.sampleDelay = 4;
+    this.markStation();
+    this.light = this.lightCfg.max;
+    this.burst(this.player.x, this.player.y, COLORS.sky, 18);
+    this.toast(this.fieldStep < this.fieldSites.length ? 'SAMPLE SAVED • TAKE ANOTHER READING' : 'OBSERVATION COMPLETE');
+    if (this.fieldStep === this.fieldSites.length && this.cluesFound === this.totalClues && !this.maze.exit.open) this.unlockExit();
   }
 
   openGates() {
@@ -622,6 +670,8 @@ export class PlayScene extends Phaser.Scene {
       ? 'GOAL: REACH THE KEYHOLE'
       : `GOAL: FIND ${this.totalClues - this.cluesFound} MORE ${this.totalClues - this.cluesFound === 1 ? 'DISCOVERY' : 'DISCOVERIES'}`;
     if (this.level.id === 'seed' && !this.beaconLit && this.cluesFound === this.totalClues) goal = 'GOAL: COLLECT TWO GIFTS';
+    if (this.fieldStep < this.fieldSites.length) goal = 'VISIT BLUE RING • ' + this.fieldStep + '/' + this.fieldSites.length;
+    if (this.sampleDelay > 0) goal = 'NEXT SAMPLE IN ' + Math.ceil(this.sampleDelay) + 's';
     if (this.surge > 0) goal = 'TAG STATIC • ' + Math.ceil(this.surge) + 's';
     set('goal', goal, (v) => this.goalText.setText(v).setColor(this.maze.exit.open ? CSS.gold : CSS.soft));
 
@@ -688,7 +738,14 @@ export class PlayScene extends Phaser.Scene {
     objs.push(g);
     objs.push(label(this, W / 2, cy - 56, `LEVEL ${this.levelIndex + 1} · ${this.level.stage}`, { size: 15, color: CSS.lime, letterSpacing: 2 }));
     objs.push(label(this, W / 2, cy - 26, this.level.name, { size: 28, heading: true, color: CSS.cream }));
-    objs.push(label(this, W / 2, cy + 18, this.level.tip, { size: 17, color: CSS.soft, wrap: w - 40, bold: false }));
+    objs.push(label(this, W / 2, cy + 18, ([
+      this.level.tip,
+      choice(0) ? 'Reserve battery equipped. Take the longer route for a heart.' : 'Wide lens equipped. Watch for Static beyond the next corner.',
+      choice(1) ? 'Visit the blue base ring, then carry your reading to the distant ring.' : 'Visit the blue base ring twice. Leave and circle back for a second sample.',
+      choice(2) ? 'Visit both blue instruments to compare readings.' : 'Visit the blue instrument twice to replay its original reading.',
+      choice(3) ? 'Fictional participant: “Getting to work was the hard part.” Trace the commute to the blue ring.' : 'Fictional participant: “Mornings were the hardest.” Find the blue ring at the early field station.',
+      choice(4) ? 'Your beacon lights the final station. Visit its ring for a full recharge.' : 'Your beacon lights the crossing. Visit its ring for a full recharge.',
+    ])[this.levelIndex], { size: 17, color: CSS.soft, wrap: w - 40, bold: false }));
     objs.push(
       label(this, W / 2, cy + 64, touch ? 'SWIPE OR USE THE PAD TO START' : 'PRESS AN ARROW KEY TO START', {
         size: 14,
@@ -732,6 +789,7 @@ export class PlayScene extends Phaser.Scene {
       ghost: this.recorder.data(),
       calm: this.calm,
     };
+    recordPath(this.levelIndex, Array.from(this.trail.values()));
     const records = Save.recordRun(result);
     if (!this.calm && this.levelIndex === LEVELS.length - 1) Save.finishRun();
 

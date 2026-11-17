@@ -1,6 +1,7 @@
 // ============================================================================
 //  TitleScene.js: the start screen
 // ============================================================================
+import { challenge } from '../fieldwork.js';
 import Phaser from 'phaser';
 import { CSS, GAME_TITLE, GAME_SUBTITLE } from '../config.js';
 import { label, button, menuBackground, restartOnResize } from '../ui/widgets.js';
@@ -117,7 +118,7 @@ export class TitleScene extends Phaser.Scene {
     Sound.unlock();
     if (!Save.settings.character) { this.scene.start('CharacterSelect'); return; }
     // First time? Jump straight into level 1. Otherwise pick a level.
-    if (Save.unlocked <= 1 && !Save.level('seed')) this.scene.start('Play', { levelIndex: 0 });
+    if (challenge || (Save.unlocked <= 1 && !Save.level('seed'))) this.scene.start('Play', { levelIndex: 0 });
     else this.scene.start('LevelSelect');
   }
 }

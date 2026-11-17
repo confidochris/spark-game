@@ -68,7 +68,7 @@ export class EndScene extends Phaser.Scene {
     y += portrait ? 54 : 46;
     const half = Math.min((W - 52) / 2, 200);
     button(this, W / 2 - half / 2 - 6, y, half, 54, 'PLAY AGAIN', () => this.scene.start('LevelSelect'), { size: 18 });
-    this.copyBtn = button(this, W / 2 + half / 2 + 6, y, half, 54, 'COPY RESULT', () => this.copy(), { size: 18 });
+    this.copyBtn = button(this, W / 2 + half / 2 + 6, y, half, 54, 'MY POSTER', () => this.scene.start('Mentor', { levelIndex: 5, poster: true }), { size: 18 });
     this.shift = centerVertically(this, first, heroY - (portrait ? 130 : 86), y + 30);
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('LevelSelect'));
   }
