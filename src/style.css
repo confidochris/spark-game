@@ -1,0 +1,26 @@
+/* Page styling around the game. The game itself is drawn by Phaser. */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #051c12; /* deep FoH green, same as the game background */
+  /* Stop phones from scrolling, zooming or selecting text while you play */
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+canvas {
+  display: block;
+  outline: none;
+}
