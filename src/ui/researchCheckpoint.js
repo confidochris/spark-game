@@ -23,15 +23,16 @@ export function researchCheckpoint(level, resume) {
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
   }
-  const heading = add('h2', level === 'seed' ? 'Your community lit a beacon' : 'Which signal holds up?');
+  const heading = add('h2', level === 'seed' ? 'Five gifts opened the lab' : 'Which signal holds up?');
   heading.id = 'station-heading';
   document.body.append(dialog);
   dialog.addEventListener('cancel', event => event.preventDefault());
   dialog.addEventListener('close', () => { dialog.remove(); resume(); }, { once: true });
   dialog.showModal();
   if (level === 'seed') {
-    add('p', 'Two gifts powered a second observation point. Send a pulse into the fog to reveal a patch of the maze.');
-    const pulse = action('Send a pulse', () => {
+    const lab = add('img',''); lab.className = 'story-frame'; lab.src = 'story/lab.webp'; lab.alt = 'The community lab with five glowing windows';
+    add('p', 'One neighbor could help with supplies. Together, five neighbors funded a pilot study. Switch on the equipment to take your first reading.');
+    const pulse = action('Power up the lab', () => {
       pulse.remove();
       add('p', 'A signal came back! Your beacon has marked the area to explore.');
       finish();
@@ -39,10 +40,6 @@ export function researchCheckpoint(level, resume) {
     pulse.focus();
     return;
   }
-  const portrait = add('img', '');
-  portrait.src = import.meta.env.BASE_URL + 'characters/andersen.webp';
-  portrait.alt = 'Illustrated portrait of Dr. Andersen';
-  add('strong', 'Dr. Andersen · Research checkpoint');
   add('p', 'In mental illness research, testing an observation again can help separate a pattern from chance. Compare the readings from two stations.');
   const repeat = Math.floor(Math.random() * 3);
   const symbols = ['◆ ○ ◆', '○ ◆ ○', '◆ ◆ ○'];

@@ -30,15 +30,15 @@ export const LEVELS = [
   {
     id: 'seed',
     stage: 'SEED',
-    name: 'The First Spark',
+    name: 'The First Five',
     par: 30,
-    tip: 'Pool two gold gifts to power a beacon. Find both keys and reach the keyhole.',
+    tip: 'Collect all five neighborhood gifts to open the lab. Find both keys and reach the keyhole.',
     light: { start: 160, max: 160, min: 160, fadePerSecond: 0 }, // level 1: no drain
     map: [
       '###########',
       '#S.$..#...#',
       '#.###.#.#.#',
-      '#...#...#K#',
+      '#.$.#...#K#',
       '###.#####.#',
       '#$......#.#',
       '#.#####.#.#',
@@ -46,7 +46,7 @@ export const LEVELS = [
       '#.#.#.###.#',
       '#...#...#$#',
       '#.#####.#.#',
-      '#......E#.#',
+      '#...$..E#.#',
       '###########',
     ],
     story: {
@@ -199,8 +199,8 @@ export const LEVELS = [
       kicker: 'CHAPTER 5',
       title: 'Greater impact',
       text:
-        'A $38,711 seed grant from Foundation of Hope supporters helped a UNC researcher ' +
-        'secure more than $1.2 million from the NIH: about 30 times what donors put in.',
+        'In this fictional study, a community-funded pilot gave the team evidence to ' +
+        'apply for an NIH award and test the pattern across three partner labs.',
     },
   },
 
@@ -247,10 +247,8 @@ export const LEVELS = [
 // The story card shown on the final screen. These facts come from the
 // Foundation of Hope 2026 Annual Fund page.
 export const REAL_STORY = {
-  title: 'The real story',
-  text:
-    'Hundreds of everyday gifts were pooled into one $38,711 seed grant for a UNC researcher. ' +
-    'That early proof helped win more than $1.2 million from the NIH, about 30x what donors put in.',
-  cta: 'Help fund the next breakthrough',
-  note: '100% of your gift supports mental illness research.',
+  title: 'The missing signal · fictional finding',
+  text: 'Across the partner labs, sleep changes came before returning depression symptoms in some participants. Five neighbors helped start the pilot that made this larger test possible.',
+  cta: 'Support mental illness research',
+  note: 'Foundation of Hope Annual Fund',
 };

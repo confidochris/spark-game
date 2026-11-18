@@ -417,7 +417,7 @@ export class PlayScene extends Phaser.Scene {
       this.burst(p.x, p.y, COLORS.gold, 14);
       this.floatText(p.x, p.y - 18, '+ LIGHT', CSS.gold);
       Sound.gift();
-      if (this.level.id === 'seed' && this.giftsFound === 2) {
+      if (this.level.id === 'seed' && this.giftsFound === this.totalGifts) {
         this.beaconLit = true;
         this.observe();
       }
@@ -669,7 +669,7 @@ export class PlayScene extends Phaser.Scene {
     let goal = this.maze.exit.open
       ? 'GOAL: REACH THE KEYHOLE'
       : `GOAL: FIND ${this.totalClues - this.cluesFound} MORE ${this.totalClues - this.cluesFound === 1 ? 'DISCOVERY' : 'DISCOVERIES'}`;
-    if (this.level.id === 'seed' && !this.beaconLit && this.cluesFound === this.totalClues) goal = 'GOAL: COLLECT TWO GIFTS';
+    if (this.level.id === 'seed' && !this.beaconLit ) goal = 'GIFTS FOR THE LAB • ' + this.giftsFound + '/5';
     if (this.fieldStep < this.fieldSites.length) goal = 'VISIT BLUE RING • ' + this.fieldStep + '/' + this.fieldSites.length;
     if (this.sampleDelay > 0) goal = 'NEXT SAMPLE IN ' + Math.ceil(this.sampleDelay) + 's';
     if (this.surge > 0) goal = 'TAG STATIC • ' + Math.ceil(this.surge) + 's';

@@ -113,7 +113,7 @@ export class LevelCompleteScene extends Phaser.Scene {
     const next = () => {
       this.scene.start('Mentor', { levelIndex: r.levelIndex });
     };
-    button(this, W / 2, bY, Math.min(W - 40, 340), 62, 'MEET DR. ANDERSEN', next, { primary: true, size: 22 });
+    button(this, W / 2, bY, Math.min(W - 40, 340), 62, 'OPEN FIELD NOTES', next, { primary: true, size: 22 });
     const half = Math.min((W - 52) / 2, 164);
     button(this, W / 2 - half / 2 - 6, bY + 76, half, 52, 'RETRY', () => this.scene.start('Play', { levelIndex: r.levelIndex }), { icon: 'iconRestart', size: 18 });
     button(this, W / 2 + half / 2 + 6, bY + 76, half, 52, 'LEVELS', () => this.scene.start('LevelSelect'), { size: 18 });

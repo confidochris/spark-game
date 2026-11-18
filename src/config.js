@@ -95,10 +95,9 @@ export const LIVES = {
 // ---- Characters ----------------------------------------------------------------
 // Pictures live in public/characters/. To swap a face, replace the PNG
 // (square, transparent background, 256x256 is plenty) and keep the file name.
-export const CHARACTERS = [
-  { id: 'chris', name: 'CHRIS', file: 'characters/chris.png' },
-  { id: 'shelley', name: 'SHELLEY', file: 'characters/shelley.png' },
-];
+export const CHARACTERS = ['Dark hair and glasses', 'Sand-colored hijab', 'Silver hair and beard', 'Silver bob and glasses', 'Locs and lab coat', 'Red hair and denim'].map((name, i) => ({
+  id: 'researcher' + i, name, file: 'characters/researcher' + i + '.webp',
+}));
 export const FACE_SIZE = 38; // how big the face is in the maze (a square is 40)
 
 // ---- Hazards -------------------------------------------------------------------
@@ -132,7 +131,7 @@ export const LAYOUT = {
 
 // ---- Links & text ----------------------------------------------------------------
 export const GAME_TITLE = 'SPARK';
-export const GAME_SUBTITLE = 'Unlock the next discovery';
+export const GAME_SUBTITLE = 'The Missing Signal';
 // Where the "Help fund the next breakthrough" button goes. It opens in a new tab.
 export const GIVE_URL = 'https://annualfund.walkforhope.com/#give';
 
