@@ -13,6 +13,7 @@
 //    LevelComplete stars, score and the story after each level
 //    End           "Discovery Unlocked" after the final level
 // ============================================================================
+import { MentorScene } from './scenes/MentorScene.js';
 import Phaser from 'phaser';
 import { CSS } from './config.js';
 import { computeGameSize, RES } from './systems/layout.js';
@@ -40,7 +41,7 @@ const game = new Phaser.Game({
   },
   input: { activePointers: 3 }, // allow a few fingers at once
   render: { antialias: true },
-  scene: [BootScene, TitleScene, CharacterSelectScene, LevelSelectScene, PlayScene, PauseScene, TryAgainScene, LevelCompleteScene, EndScene],
+  scene: [BootScene, MentorScene, TitleScene, CharacterSelectScene, LevelSelectScene, PlayScene, PauseScene, TryAgainScene, LevelCompleteScene, EndScene],
 });
 
 // When the window changes shape (for example a phone turns sideways),

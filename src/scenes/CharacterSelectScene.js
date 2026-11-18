@@ -1,45 +1,51 @@
-// Choose a face. The setting is shared by the player and the ghost.
 import Phaser from 'phaser';
-import { CHARACTERS, CSS, COLORS } from '../config.js';
+import { CHARACTERS } from '../config.js';
 import { Save } from '../systems/save.js';
-import { Sound } from '../systems/sound.js';
-import { sized } from '../systems/textures.js';
-import { view, setupCamera } from '../systems/layout.js';
-import { label, button, menuBackground, panel, restartOnResize } from '../ui/widgets.js';
 
 export class CharacterSelectScene extends Phaser.Scene {
   constructor() { super('CharacterSelect'); }
-  init(data) { this.returnTo = data?.returnTo; }
-  create() {
-    setupCamera(this);
-    menuBackground(this);
-    restartOnResize(this, { returnTo: this.returnTo });
-    const { width: W, height: H } = view(this);
-    const portrait = H > W;
-    const top = portrait ? H * 0.24 : 60;
-    label(this, W / 2, top, 'Choose your spark', { size: 42, heading: true, color: CSS.gold });
-    label(this, W / 2, top + 54, 'Two friendly faces. One bright mission.', { size: 18, color: CSS.soft });
-    const cw = Math.min(210, (W - 72) / 2);
-    const cy = top + 206;
-    for (const [i, c] of CHARACTERS.entries()) {
-      const x = W / 2 + (i ? 1 : -1) * (cw / 2 + 12);
-      const g = this.add.graphics();
-      panel(g, x - cw / 2, cy - 100, cw, 260, { radius: 24, stroke: Save.settings.character === c.id ? COLORS.gold : COLORS.soft, strokeAlpha: 0.7 });
-      this.add.image(x, cy - 8, 'glow').setAlpha(0.55).setTint(COLORS.gold);
-      sized(this.add.image(x, cy - 18, `face-${c.id}`), cw - 40);
-      button(this, x, cy + 110, cw - 24, 54, c.name, () => this.choose(c.id), { primary: true, size: 22 });
-      this.add.zone(x, cy - 20, cw, 180).setInteractive({ useHandCursor: true }).on('pointerup', () => this.choose(c.id));
-    }
-    label(this, W / 2, cy + 211, 'You can change your character on the Title screen.', { size: 16, color: CSS.muted, bold: false, wrap: W - 60 });
-    button(this, W / 2, Math.min(H - 48, cy + 280), 200, 44, 'BACK', () => this.scene.start('Title'), { size: 16 });
-    this.input.keyboard.once('keydown-LEFT', () => this.choose('chris'));
-    this.input.keyboard.once('keydown-RIGHT', () => this.choose('shelley'));
-  }
-  choose(id) {
-    Save.setSetting('character', id);
-    Sound.unlock(); Sound.click();
-    if (this.returnTo) this.scene.start(this.returnTo);
-    else if (Save.unlocked <= 1 && !Save.level('seed')) this.scene.start('Play', { levelIndex: 0 });
-    else this.scene.start('LevelSelect');
+  create(data) {
+    const dialog = document.createElement('dialog');
+    dialog.className = 'research-station onboarding';
+    dialog.setAttribute('aria-label','Your research team');
+    document.body.append(dialog);
+    this.events.once('shutdown', () => dialog.remove());
+    dialog.oncancel = event => { event.preventDefault(); this.scene.start('Title'); };
+    const add = (tag, text) => {
+      const el = document.createElement(tag); el.textContent = text; dialog.append(el); return el;
+    };
+    add('h2','Your lab badge');
+    const scroll = add('div',''); scroll.className = 'badge-options';
+    const grid = document.createElement('div'); scroll.append(grid); grid.className = 'avatar-grid';
+    let picked = CHARACTERS.find(c => c.id === Save.settings.character) || CHARACTERS[0];
+    const buttons = CHARACTERS.map(c => {
+      const b = document.createElement('button');
+      const img = new Image(); img.src = c.file; img.alt = c.name; b.append(img); grid.append(b);
+      b.setAttribute('aria-pressed', String(c === picked));
+      b.onclick = () => { picked = c; buttons.forEach(el => el.setAttribute('aria-pressed', String(el === b))); };
+      return b;
+    });
+    const label = add('label','First name or nickname'); label.htmlFor = 'badge-name';
+    const input = add('input',''); input.id = label.htmlFor; input.maxLength = 24; input.value = Save.settings.badge || '';
+    const start = add('button',data?.returnTo ? 'Save badge' : 'Continue to story →');
+    start.onclick = () => {
+      const name = input.value.trim();
+      if (!name) { input.setCustomValidity('Enter a name for your badge.'); input.focus(); input.reportValidity(); return; }
+      Save.setSetting('badge',name); Save.setSetting('character',picked.id);
+      if (data?.returnTo) { this.scene.start(data.returnTo); return; }
+      dialog.replaceChildren();
+      dialog.classList.add('story-intro');
+      const art = add('img',''); art.className = 'story-frame'; art.src = 'story/kitchen.webp'; art.alt = 'Maya sharing dinner photos with her dad by phone';
+      add('small','A fictional North Carolina community');
+      add('h2','Maya’s kitchen');
+      add('p','“Dad and I traded dinner photos. When my depression came back, I stopped sending mine. He noticed before I did.”');
+      add('p','Could changes in sleep offer an early clue for some people? Your new lab has a question to test.');
+      const fact = add('p','In 2024, about 1 in 3 U.S. adults ages 18–25 experienced mental illness.');
+      const source = document.createElement('a'); source.textContent = 'SAMHSA · 2024 survey, table 9.45B'; source.href = 'https://www.samhsa.gov/data/sites/default/files/reports/rpt56484/NSDUHDetailedTabs2024/NSDUHDetailedTabs2024/2024-nsduh-detailed-tables-sect9pe.htm'; source.target = '_blank'; source.rel = 'noopener'; fact.append(source);
+      const go = add('button','Start Level 1 →'); go.onclick = () => this.scene.start('Play',{levelIndex:0}); go.focus();
+    };
+    input.oninput = () => input.setCustomValidity('');
+    input.onkeydown = e => { if (e.key === 'Enter') start.click(); };
+    dialog.showModal();
   }
 }

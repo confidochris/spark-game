@@ -12,6 +12,8 @@ export class StaticBlob {
     this.scene = scene;
     this.maze = maze;
     this.rng = rng; // a seeded random generator, so each level behaves the same way
+    this.home = { x, y };
+    this.absent = false;
     this.tx = x;
     this.ty = y;
     this.dir = null;
@@ -48,7 +50,27 @@ export class StaticBlob {
     this.dir = { x: -this.dir.x, y: -this.dir.y };
   }
 
+  disperse() {
+    this.absent = true;
+    this.returnIn = HAZARDS.returnSeconds;
+    this.sprite.setVisible(false);
+    this.hint.setVisible(false);
+  }
+
   update(dt) {
+    if (this.absent) {
+      this.returnIn -= dt;
+      const home = this.maze.toPixel(this.home.x, this.home.y);
+      const player = this.scene.player;
+      if (this.returnIn > 0 || Math.hypot(home.x - player.x, home.y - player.y) < 3 * TILE) return;
+      this.absent = false;
+      this.tx = this.home.x;
+      this.ty = this.home.y;
+      this.dir = null;
+      this.progress = 0;
+      this.sprite.setVisible(true);
+      this.hint.setVisible(true);
+    }
     // flicker between the 4 static pictures
     this.frameTime += dt;
     if (this.frameTime > 0.08) {

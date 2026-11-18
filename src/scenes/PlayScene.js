@@ -1,3 +1,6 @@
+import { beginStudy, choice, recordPath } from '../fieldwork.js';
+import { Study, instructions, records, honors } from '../game/Study.js';
+import { evidencePanel } from '../ui/evidence.js';
 import { sized } from '../systems/textures.js';
 // ============================================================================
 //  PlayScene.js: one level of the game
@@ -16,7 +19,6 @@ import { Maze, DIRS } from '../game/Maze.js';
 import { Player } from '../game/Player.js';
 import { Fog } from '../game/Fog.js';
 import { StaticBlob } from '../game/StaticBlob.js';
-import { GhostRecorder, GhostPlayer } from '../game/Ghost.js';
 import { TouchControls } from '../ui/TouchControls.js';
 import { label, panel } from '../ui/widgets.js';
 import { Save } from '../systems/save.js';
@@ -43,13 +45,15 @@ export class PlayScene extends Phaser.Scene {
     // ---- Game state -----------------------------------------------------------
     this.state = 'playing'; // 'playing' | 'respawning' | 'over' | 'won'
     this.unlimitedLives = this.calm && LIVES.calmUnlimited;
-    this.lives = LIVES.start;
+    this.lives = Save.runLives;
+    this.surge = 0;
     this.livesLost = 0;
     this.lowWarned = false;
     this.elapsed = 0; // seconds (starts when Spark first moves)
     this.score = 0;
     this.dotsEaten = 0;
     this.giftsFound = 0;
+    this.beaconLit = false;
     this.cluesFound = 0;
     this.dotCombo = 0;
     this.lastDotTime = 0;
@@ -58,6 +62,12 @@ export class PlayScene extends Phaser.Scene {
     // Light settings: the level's own values, falling back to config.js
     this.lightCfg = { ...LIGHT, ...(level.light || {}) };
     this.light = this.lightCfg.start;
+    if (this.levelIndex === 0) beginStudy();
+    this.trail = new Map();
+    if (this.levelIndex === 1) {
+      if (choice(0)) this.lightCfg.fadePerSecond *= 0.70;
+      else { this.lightCfg.start += 38; this.lightCfg.max += 38; this.light = this.lightCfg.start; }
+    }
     this.lightShown = this.light;
 
     // Seeded randomness, so Static moves the same way each attempt
@@ -69,6 +79,20 @@ export class PlayScene extends Phaser.Scene {
     this.totalClues = this.maze.clues.length;
     this.totalGifts = this.maze.gifts.length;
     this.buildExit();
+    this.trail.set('start', [this.maze.start.x, this.maze.start.y]);
+    this.study = new Study(this.levelIndex, this.maze, choice(this.levelIndex - 1));
+    this.siteLabels = new Map();
+    for (const site of this.study.sites) {
+      const pos = this.maze.toPixel(site.at.x,site.at.y);
+      const badge = label(this,pos.x,pos.y - 12,site.name,{size:12,color:CSS.cream});
+      badge.setBackgroundColor('#12553a').setPadding(3).setDepth(12);
+      this.siteLabels.set(site.id,badge);
+    }
+    if (!this.levelIndex) {
+      const pos = this.maze.toPixel(this.maze.exit.x,this.maze.exit.y);
+      this.windows = Array.from({length:5},(_,i) => this.add.rectangle(pos.x - 20 + i*10,pos.y - 26,8,12,0x294a38).setStrokeStyle(1,COLORS.gold).setDepth(12));
+      label(this,pos.x,pos.y + 23,'LAB',{size:12,color:CSS.gold}).setDepth(12);
+    }
 
     this.player = new Player(this, this.maze, this.maze.start.x, this.maze.start.y);
     if (this.calm) this.player.speed *= PLAYER.calmSpeedFactor;
@@ -82,10 +106,7 @@ export class PlayScene extends Phaser.Scene {
     this.fog = new Fog(this, this.maze, this.lightCfg);
     this.fog.reveal(this.player.x, this.player.y, this.light);
 
-    // Ghost of your best run (if you have one and the option is on)
-    this.recorder = new GhostRecorder();
     const best = Save.level(level.id);
-    this.ghost = Save.settings.ghost && best?.ghost?.length > 4 && !this.calm ? new GhostPlayer(this, best.ghost) : null;
     this.bestTime = best?.bestTime ?? null;
 
     // Sparkle particles (for pickups)
@@ -100,6 +121,8 @@ export class PlayScene extends Phaser.Scene {
 
     // ---- Controls ---------------------------------------------------------------
     this.setupKeyboard();
+    this.input.keyboard.on('keydown-N', () => this.openNotes());
+    this.surgeLabel = label(this,0,0,'',{size:13,color:CSS.sky}).setDepth(15);
     this.touch = new TouchControls(this, {
       onHold: (dir) => {
         this.padDir = dir;
@@ -123,6 +146,10 @@ export class PlayScene extends Phaser.Scene {
     this.updateCamera(1);
 
     this.showIntro();
+    if (this.levelIndex === 2) this.time.delayedCall(0, () => this.openNotes('Four fictional records', {
+      note:'Three diaries show a sleep change before symptoms returned. Inspect the dates, then choose a lead.',
+      cards:records,
+    }));
     Sound.startMusic();
 
     // Pause automatically if the player switches tabs
@@ -268,20 +295,17 @@ export class PlayScene extends Phaser.Scene {
     // Row 2: goal and best time
     const row2 = this.portrait ? 80 : 78;
     this.goalText = add(label(this, 14, row2, '', { size: 16, originX: 0, color: CSS.soft, letterSpacing: 1 }));
+    this.goalText.setInteractive({useHandCursor:true}).on('pointerup', () => this.openNotes());
     const bestStr = this.calm ? 'CALM MODE' : `BEST ${formatTime(this.bestTime)}`;
     add(label(this, W - 14, row2, bestStr, { size: 16, originX: 1, color: CSS.lime, letterSpacing: 1 }));
 
     // Hearts (lives). Calm mode has unlimited lives, so they are hidden.
-    this.hearts = [];
-    const heartGap = 26;
-    const heartsW = this.unlimitedLives ? 0 : LIVES.start * heartGap + 6;
+    const heartsW = this.unlimitedLives ? 0 : 64;
     if (!this.unlimitedLives) {
       const hy = this.portrait ? 106 : row2;
-      const hx0 = this.portrait ? W - 14 - heartsW + 13 : W - 14 - 130 - heartsW;
-      for (let i = 0; i < LIVES.start; i++) {
-        const h = add(sized(this.add.image(hx0 + i * heartGap, hy, i < this.lives ? 'heart' : 'heartEmpty'), 22));
-        this.hearts.push(h);
-      }
+      const hx = this.portrait ? W - 62 : W - 185;
+      add(sized(this.add.image(hx, hy, 'heart'), 22));
+      this.heartCount = add(label(this, hx + 16, hy, '', { size: 17, originX: 0 }));
     }
 
     // Light meter
@@ -309,12 +333,14 @@ export class PlayScene extends Phaser.Scene {
     const player = this.player;
 
     if (this.state === 'playing') {
+
+      this.surge = Math.max(0, this.surge - dt);
       player.hold(this.heldDirection());
       player.update(dt);
+      if (this.state === 'observing') return;
 
       if (player.moved) {
         this.elapsed += dt;
-        this.recorder.update(dt, player.x, player.y);
         // The light slowly fades as you explore (Calm mode: half as fast)
         // The light drains as you explore. Calm mode: slower, and it never runs out.
         const cfg = this.lightCfg;
@@ -331,9 +357,8 @@ export class PlayScene extends Phaser.Scene {
         }
         if (this.intro && !this.introGone) this.hideIntro();
       }
-      if (this.ghost) this.ghost.update(dt, player.moved);
 
-      this.statics.forEach((s) => s.update(dt));
+      if (player.moved) this.statics.forEach((s) => s.update(dt));
       this.checkStatic();
       this.updateDoors(dt);
     } else {
@@ -357,6 +382,9 @@ export class PlayScene extends Phaser.Scene {
     const key = this.maze.key(x, y);
     const p = this.maze.toPixel(x, y);
 
+    this.trail.set(key, [x,y]);
+
+
     // Data dot
     const dot = this.maze.dots.get(key);
     if (dot) {
@@ -370,6 +398,17 @@ export class PlayScene extends Phaser.Scene {
       Sound.dot(this.dotCombo);
     }
 
+    const heart = this.maze.hearts.get(key);
+    if (heart) {
+      this.maze.hearts.delete(key);
+      heart.destroy();
+      Save.collectHeart(this.level.id + key);
+      this.lives = Save.runLives;
+      this.burst(p.x, p.y, COLORS.gold, 18);
+      this.floatText(p.x, p.y - 20, '1UP!', CSS.goldLight);
+      Sound.gift();
+    }
+
     // Gold gift
     const gift = this.maze.gifts.find((g) => g.x === x && g.y === y && !g.taken);
     if (gift) {
@@ -377,11 +416,16 @@ export class PlayScene extends Phaser.Scene {
       this.tweens.killTweensOf(gift.sprite);
       this.tweens.add({ targets: gift.sprite, scale: 1.8, alpha: 0, duration: 260, onComplete: () => gift.sprite.destroy() });
       this.giftsFound++;
+      if (!this.levelIndex) this.windows[this.giftsFound - 1].setFillStyle(COLORS.gold);
       this.score += SCORE.gift;
       this.light = Math.min(this.lightCfg.max, this.light + this.lightCfg.giftRefill);
       this.burst(p.x, p.y, COLORS.gold, 14);
       this.floatText(p.x, p.y - 18, '+ LIGHT', CSS.gold);
       Sound.gift();
+      if (this.level.id === 'seed' && this.giftsFound === this.totalGifts) {
+        this.beaconLit = true;
+        this.unlockExit();
+      }
     }
 
     // Discovery
@@ -391,18 +435,45 @@ export class PlayScene extends Phaser.Scene {
       this.tweens.killTweensOf(clue.sprite);
       this.tweens.add({ targets: clue.sprite, scale: 2, alpha: 0, duration: 380, onComplete: () => clue.sprite.destroy() });
       this.cluesFound++;
+      if (this.statics.length) this.surge = HAZARDS.surgeSeconds;
       this.score += SCORE.discovery;
       this.light = this.lightCfg.max; // a discovery fully restores your light
       this.burst(p.x, p.y, COLORS.lime, 24);
       this.floatText(p.x, p.y - 20, `DISCOVERY ${this.cluesFound}/${this.totalClues}`, CSS.lime);
       Sound.discovery();
       this.openGates();
-      if (this.cluesFound >= this.totalClues) this.unlockExit();
     }
+    const site = this.study.sites.find(s => s.at.x === x && s.at.y === y);
+    if (site) {
+      const info = this.study.inspect(site.id);
+      if (info) this.openNotes(site.name,info);
+    }
+    this.checkStudyExit();
 
     // The keyhole
     const e = this.maze.exit;
     if (e.open && x === e.x && y === e.y) this.win();
+  }
+
+  checkStudyExit() {
+    if (this.levelIndex && !this.maze.exit.open && this.study.solved && this.cluesFound === this.totalClues) this.unlockExit();
+  }
+
+  openNotes(title = 'Field notebook', info = null) {
+    if (this.state !== 'playing') return;
+    this.touch.release();
+    this.padDir = null;
+    this.state = 'observing';
+    this.scene.pause();
+    const notes = [...(this.levelIndex === 2 ? records : []), ...this.study.notes];
+    this.noteBox = evidencePanel(title, info || {note:instructions[this.levelIndex],cards:notes,allowGiving:true}, () => {
+      this.noteBox = null;
+      this.state = 'playing';
+      this.scene.resume();
+      for (const [id, badge] of this.siteLabels) if (this.study.items.has(id)) badge.setAlpha(0.45);
+      if (this.levelIndex === 4) this.study.solved = ['east','west','home'].every(id => this.study.items.has(id));
+      this.checkStudyExit();
+    });
   }
 
   openGates() {
@@ -434,9 +505,18 @@ export class PlayScene extends Phaser.Scene {
 
   checkStatic() {
     const p = this.player;
-    if (p.safe > 0) return;
+    if (this.state !== 'playing') return;
     for (const s of this.statics) {
+      if (s.absent) continue;
       if (Math.hypot(s.x - p.x, s.y - p.y) < PLAYER.hitRadius) {
+        if (this.surge > 0) {
+          s.disperse();
+          this.burst(s.x, s.y, COLORS.sky, 16);
+          this.floatText(s.x, s.y - 20, 'STATIC CLEARED', CSS.sky);
+          Sound.gate();
+          continue;
+        }
+        if (p.safe > 0) return;
         if (!this.unlimitedLives) {
           s.reverse();
           this.loseLife('static');
@@ -464,7 +544,8 @@ export class PlayScene extends Phaser.Scene {
   loseLife(reason) {
     if (this.state !== 'playing' || this.player.safe > 0) return;
     const p = this.player;
-    this.lives = Math.max(0, this.lives - 1);
+    this.lives = Save.loseHeart();
+    this.surge = 0;
     this.livesLost++;
     this.touch.release();
     this.padDir = null;
@@ -474,7 +555,6 @@ export class PlayScene extends Phaser.Scene {
     this.cameras.main.flash(200, 217, 67, 79, false);
     this.burst(p.x, p.y, reason === 'light' ? COLORS.gold : COLORS.sky, 22);
     this.floatText(p.x, p.y - 24, reason === 'light' ? 'OUT OF LIGHT!' : 'NOISY DATA!', '#FF8A7A');
-    this.popHeart(this.lives);
     this.updateHud(true);
     if (this.lives <= 0) {
       this.state = 'over';
@@ -497,15 +577,6 @@ export class PlayScene extends Phaser.Scene {
       this.toast(`${this.lives} ${this.lives === 1 ? 'HEART' : 'HEARTS'} LEFT`);
       this.state = 'playing';
     });
-  }
-
-  popHeart(i) {
-    const h = this.hearts?.[i];
-    if (!h) return;
-    h.setTexture('heartEmpty');
-    sized(h, 22);
-    const base = h.scaleX;
-    this.tweens.add({ targets: h, scaleX: base * 1.6, scaleY: base * 1.6, duration: 160, yoyo: true });
   }
 
   updateDoors(dt) {
@@ -578,9 +649,19 @@ export class PlayScene extends Phaser.Scene {
     if (!this.calm) set('time', formatTime(this.elapsed), (v) => this.timerText.setText(v));
     set('clues', `${this.cluesFound}/${this.totalClues}`, (v) => this.clueText.setText(v));
     set('gifts', `${this.giftsFound}/${this.totalGifts}`, (v) => this.giftText.setText(v));
-    const goal = this.maze.exit.open
+    if (!this.unlimitedLives) set('hearts', this.lives, v => this.heartCount.setText('× ' + v));
+    set('surging', this.surge > 0, active => {
+      this.player.ring.setTint(active ? COLORS.sky : 0xffffff);
+      for (const enemy of this.statics) enemy.sprite.setTint(active ? COLORS.sky : 0xffffff);
+    });
+    let goal = this.maze.exit.open
       ? 'GOAL: REACH THE KEYHOLE'
       : `GOAL: FIND ${this.totalClues - this.cluesFound} MORE ${this.totalClues - this.cluesFound === 1 ? 'DISCOVERY' : 'DISCOVERIES'}`;
+    if (this.level.id === 'seed' && !this.beaconLit ) goal = 'GIFTS FOR THE LAB • ' + this.giftsFound + '/5';
+    if (!this.study.solved) goal = this.study.objective;
+    if (!this.levelIndex && this.beaconLit) goal = 'Enter the lit lab';
+    this.surgeLabel.setPosition(this.player.x,this.player.y - 32).setText(this.surge > 0 ? 'SURGE ' + Math.ceil(this.surge) + 's' : '');
+    goal = '▤ ' + goal;
     set('goal', goal, (v) => this.goalText.setText(v).setColor(this.maze.exit.open ? CSS.gold : CSS.soft));
 
     // light meter
@@ -646,7 +727,7 @@ export class PlayScene extends Phaser.Scene {
     objs.push(g);
     objs.push(label(this, W / 2, cy - 56, `LEVEL ${this.levelIndex + 1} · ${this.level.stage}`, { size: 15, color: CSS.lime, letterSpacing: 2 }));
     objs.push(label(this, W / 2, cy - 26, this.level.name, { size: 28, heading: true, color: CSS.cream }));
-    objs.push(label(this, W / 2, cy + 18, this.level.tip, { size: 17, color: CSS.soft, wrap: w - 40, bold: false }));
+    objs.push(label(this, W / 2, cy + 18, instructions[this.levelIndex], { size: 17, color: CSS.soft, wrap: w - 40, bold: false }));
     objs.push(
       label(this, W / 2, cy + 64, touch ? 'SWIPE OR USE THE PAD TO START' : 'PRESS AN ARROW KEY TO START', {
         size: 14,
@@ -658,7 +739,7 @@ export class PlayScene extends Phaser.Scene {
     this.intro = objs;
     this.introGone = false;
     // fade it after a few seconds even if you haven't moved yet
-    this.time.delayedCall(4500, () => this.hideIntro());
+
   }
 
   hideIntro() {
@@ -679,7 +760,8 @@ export class PlayScene extends Phaser.Scene {
     const stars = [true, this.giftsFound >= this.totalGifts, time <= this.par];
     const starCount = stars.filter(Boolean).length;
     const timeBonus = Math.round(Math.max(0, this.par - time) * SCORE.timeBonusPerSecond);
-    this.score += timeBonus;
+    const distinction = this.study.distinction(this.cluesFound) ? honors[this.levelIndex] : '';
+    this.score += timeBonus + (distinction ? 500 : 0);
 
     const result = {
       id: this.level.id,
@@ -687,10 +769,11 @@ export class PlayScene extends Phaser.Scene {
       time,
       stars: starCount,
       score: this.score,
-      ghost: this.recorder.data(),
       calm: this.calm,
     };
+    recordPath(this.levelIndex, Array.from(this.trail.values()), this.study.notes, distinction);
     const records = Save.recordRun(result);
+    if (!this.calm && this.levelIndex === LEVELS.length - 1) Save.finishRun();
 
     // celebration: the fog lifts and the keyhole bursts with light
     Sound.win();
@@ -709,6 +792,7 @@ export class PlayScene extends Phaser.Scene {
         stars,
         score: this.score,
         timeBonus,
+        distinction,
         dots: this.dotsEaten,
         gifts: this.giftsFound,
         totalGifts: this.totalGifts,
@@ -739,6 +823,8 @@ export class PlayScene extends Phaser.Scene {
   }
 
   cleanup() {
+    this.noteBox?.remove();
+    this.noteBox = null;
     this.scale.off('resize', this.onResize);
     this.game.events.off('hidden', this.onHidden);
     this.touch.destroy();

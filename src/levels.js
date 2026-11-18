@@ -30,15 +30,15 @@ export const LEVELS = [
   {
     id: 'seed',
     stage: 'SEED',
-    name: 'A Promising Idea',
+    name: 'The First Five',
     par: 30,
-    tip: 'Find the 2 discoveries hidden in the fog, then reach the keyhole.',
+    tip: 'Collect all five neighborhood gifts to open the lab. Find both keys and reach the keyhole.',
     light: { start: 160, max: 160, min: 160, fadePerSecond: 0 }, // level 1: no drain
     map: [
       '###########',
-      '#S....#...#',
+      '#S.$..#...#',
       '#.###.#.#.#',
-      '#...#...#K#',
+      '#.$.#...#K#',
       '###.#####.#',
       '#$......#.#',
       '#.#####.#.#',
@@ -46,7 +46,7 @@ export const LEVELS = [
       '#.#.#.###.#',
       '#...#...#$#',
       '#.#####.#.#',
-      '#$.....E#.#',
+      '#...$..E#.#',
       '###########',
     ],
     story: {
@@ -62,16 +62,16 @@ export const LEVELS = [
   {
     id: 'pilot',
     stage: 'PILOT',
-    name: 'The First Investment',
+    name: 'The Paired Diaries',
     par: 40,
-    tip: 'Your light drains now! Grab gold gifts. Dodge the Static, time the door.',
-    light: { fadePerSecond: 3.5 }, // about 35 s of light without pickups
+    tip: 'Gold gifts refill light. Grab a key, then tag Static before your surge ends.',
+    light: { fadePerSecond: 6 },
     staticSpeed: 2.2, // slow: the first Static
     map: [
       '#############',
       '#S..#.....#$#',
       '###.#.###.#.#',
-      '#...#.#K#...#',
+      '#...#.#K#..H#',
       '#.###.#.###.#',
       '#.....#.....#',
       '#####.#####C#',
@@ -97,10 +97,10 @@ export const LEVELS = [
   {
     id: 'test',
     stage: 'TESTING',
-    name: 'Putting It to the Test',
+    name: 'The Fourth Record',
     par: 45,
-    tip: 'More Static now, and faster. Each touch costs a heart.',
-    light: { fadePerSecond: 4.0 }, // about 31 s
+    tip: 'Find a key to sample the signals. Test which pattern repeats.',
+    light: { fadePerSecond: 6.8 },
     staticSpeed: 3.0,
     map: [
       '#############',
@@ -134,10 +134,10 @@ export const LEVELS = [
   {
     id: 'discovery',
     stage: 'EVIDENCE',
-    name: 'A New Discovery',
+    name: 'Defend the Pilot',
     par: 48,
     tip: 'Doors and Static together now. Time your dash, or take the long way.',
-    light: { fadePerSecond: 4.3 }, // about 29 s
+    light: { fadePerSecond: 7.4 },
     staticSpeed: 3.3,
     map: [
       '###################',
@@ -153,7 +153,7 @@ export const LEVELS = [
       '#####C#.###.#.###C#',
       '#$....#.#K#...#...#',
       '#.###.#.#.#####.#.#',
-      '#...#...#.......#E#',
+      '#H..#...#.......#E#',
       '###################',
     ],
     story: {
@@ -169,18 +169,18 @@ export const LEVELS = [
   {
     id: 'impact',
     stage: 'NIH FUNDING',
-    name: 'Greater Impact',
+    name: 'Across Three Labs',
     par: 72,
     tip: 'Numbered gates open when you hold that many discoveries.',
-    light: { fadePerSecond: 4.6 }, // about 27 s
+    light: { fadePerSecond: 8 },
     staticSpeed: 3.6,
     map: [
       '#####################',
       '#S....#.......#....K#',
-      '#.###.#.#####.#.###.#',
-      '#.#...#...#.....#...#',
+      '#.#...#.#####.#.###.#',
+      '#.........#.....#...#',
       '#.#.#####.#.#####.#.#',
-      '#$#.......#...N.....#',
+      '#$............N.....#',
       '###########1#########',
       '#.....#.......#....$#',
       '#.###.#.#####.#.###.#',
@@ -199,8 +199,8 @@ export const LEVELS = [
       kicker: 'CHAPTER 5',
       title: 'Greater impact',
       text:
-        'A $38,711 seed grant from Foundation of Hope supporters helped a UNC researcher ' +
-        'secure more than $1.2 million from the NIH: about 30 times what donors put in.',
+        'In this fictional study, a community-funded pilot gave the team evidence to ' +
+        'apply for an NIH award and test the pattern across three partner labs.',
     },
   },
 
@@ -208,10 +208,10 @@ export const LEVELS = [
   {
     id: 'next',
     stage: 'DISCOVERY',
-    name: 'The Next Question',
+    name: 'The Missing Signal',
     par: 50,
     tip: 'The keyhole waits in the center. Find all 4 discoveries to open the way.',
-    light: { fadePerSecond: 5.0 }, // about 25 s
+    light: { fadePerSecond: 8.5 },
     staticSpeed: 3.9,
     map: [
       '###################',
@@ -219,11 +219,11 @@ export const LEVELS = [
       '#.###.#.###.#.###.#',
       '#.#.....#..N..#...#',
       '#.#.###.#.###.#.#.#',
-      '#...#.N.....#...#.#',
+      '#...#.N.....#...#H#',
       '###.#.#######.###.#',
       '#$..#.#.....#.#...#',
       '#.###.#.###.#.#.###',
-      '#.....C.#E4.C.....#',
+      '#.....C.#E4.C..N..#',
       '#.###.#.#####.#.#.#',
       '#K#...#.......#.#$#',
       '#.#.#.#########.#.#',
@@ -247,10 +247,8 @@ export const LEVELS = [
 // The story card shown on the final screen. These facts come from the
 // Foundation of Hope 2026 Annual Fund page.
 export const REAL_STORY = {
-  title: 'The real story',
-  text:
-    'Hundreds of everyday gifts were pooled into one $38,711 seed grant for a UNC researcher. ' +
-    'That early proof helped win more than $1.2 million from the NIH, about 30x what donors put in.',
-  cta: 'Help fund the next breakthrough',
-  note: '100% of your gift supports mental illness research.',
+  title: 'The missing signal · fictional finding',
+  text: 'Across the partner labs, sleep changes came before returning depression symptoms in some participants. Five neighbors helped start the pilot that made this larger test possible.',
+  cta: 'Support mental illness research',
+  note: 'Foundation of Hope Annual Fund',
 };

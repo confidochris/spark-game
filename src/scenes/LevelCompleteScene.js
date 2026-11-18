@@ -94,7 +94,7 @@ export class LevelCompleteScene extends Phaser.Scene {
 
     // ---- Story card -------------------------------------------------------------------
     let sy = portrait ? y : 92;
-    const story = level.story;
+    const story = { ...level.story, text: level.story.text + (r.distinction ? '\n\n✦ ' + r.distinction : '') };
     const cardX = rightX - colW / 2;
     const text = label(this, rightX, 0, story.text, { size: 18, color: CSS.soft, bold: false, wrap: colW - 44, align: 'left', lineSpacing: 6 }).setDepth(2);
     const cardH = text.height + 110;
@@ -111,10 +111,9 @@ export class LevelCompleteScene extends Phaser.Scene {
     const by = portrait ? Math.max(sy + 30, y + cardH + 52) : Math.max(sy, y) + 34;
     const bY = Math.min(by, H - 110);
     const next = () => {
-      if (isLast) this.scene.start('End');
-      else this.scene.start('Play', { levelIndex: r.levelIndex + 1 });
+      this.scene.start('Mentor', { levelIndex: r.levelIndex });
     };
-    button(this, W / 2, bY, Math.min(W - 40, 340), 62, isLast ? 'UNLOCK THE DISCOVERY' : 'NEXT LEVEL', next, { primary: true, size: 22 });
+    button(this, W / 2, bY, Math.min(W - 40, 340), 62, 'OPEN FIELD NOTES', next, { primary: true, size: 22 });
     const half = Math.min((W - 52) / 2, 164);
     button(this, W / 2 - half / 2 - 6, bY + 76, half, 52, 'RETRY', () => this.scene.start('Play', { levelIndex: r.levelIndex }), { icon: 'iconRestart', size: 18 });
     button(this, W / 2 + half / 2 + 6, bY + 76, half, 52, 'LEVELS', () => this.scene.start('LevelSelect'), { size: 18 });

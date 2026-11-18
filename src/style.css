@@ -24,3 +24,73 @@ canvas {
   display: block;
   outline: none;
 }
+
+.research-station {
+  box-sizing: border-box;
+  width: min(92vw, 420px);
+  max-height: 88dvh;
+  overflow-y: auto;
+  touch-action: pan-y;
+  padding: clamp(16px, 4vw, 28px);
+  border: 2px solid #e8bc53;
+  border-radius: 18px;
+  background: #102c22;
+  color: #fff8e6;
+  font: 1rem/1.45 system-ui, sans-serif;
+}
+.research-station::backdrop { background: #04130fde; }
+.research-station h2 { margin: 0 0 .6em; color: #ffe19c; }
+.research-station img { width: 66px; vertical-align: middle; margin-right: .5rem; }
+.research-station button, .research-station a {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: .5rem;
+  padding: .65rem;
+  border: 1px solid #82ac91;
+  border-radius: .65rem;
+  background: #184335;
+  color: white;
+  text-align: center;
+  font: inherit;
+  cursor: pointer;
+}
+.research-station button:disabled { opacity: .55; }
+
+.mentor { background: #0b281e; border-top: 5px solid #e8bc53; }
+.mentor small { display: block; margin: .6em 0; color: #c5dfb9; }
+.mentor img:first-of-type { width: 90px; float: right; margin: 0 0 8px 12px; }
+.mentor img:nth-of-type(2) { width: 42px; }
+.mentor canvas { width: 100%; height: auto; }
+
+.research-station a.donation-link {
+  width: fit-content;
+  max-width: 100%;
+  margin: .65rem auto 0;
+  padding: .55rem .75rem;
+  border: 0;
+  background: transparent;
+  color: #bdcfc2;
+  font-size: .875rem;
+  text-underline-offset: .2em;
+}
+.research-station .donation-link:hover,
+.research-station .donation-link:focus-visible { color: #fff8e6; }
+
+.avatar-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin-bottom:1rem; }
+.avatar-grid button { padding:3px; }
+.avatar-grid button[aria-pressed=true] { outline:3px solid #ffe19c; }
+.avatar-grid img { width:100%; display:block; border-radius:.35rem; }
+.onboarding input { width:100%; box-sizing:border-box; font:inherit; padding:.6rem; margin:.4rem 0; }
+.research-station img.story-frame { display:block; float:none; width:100%; margin:0 0 .8rem; border-radius:.6rem; }
+
+.onboarding[open]:not(.story-intro) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.badge-options { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.onboarding .avatar-grid { margin: 0 0 .5rem; }
+.onboarding .avatar-grid img { width: 100%; height: clamp(44px, 10dvh, 83px); object-fit: contain; margin: 0; }
+.onboarding > button:last-child { flex-shrink: 0; background: #f2c14e; color: #102c22; font-weight: bold; }
+.story-intro > button:last-child { position: sticky; bottom: 0; }

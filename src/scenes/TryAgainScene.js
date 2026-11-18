@@ -14,11 +14,11 @@ export class TryAgainScene extends Phaser.Scene {
     panel(this.add.graphics(), W / 2 - w / 2, top, w, 410, { radius: 24, stroke: COLORS.gold, strokeAlpha: 0.8 });
     label(this, W / 2, top + 55, 'Try again', { size: 44, heading: true, color: CSS.gold });
     label(this, W / 2, top + 113, 'Every discovery takes persistence.', { size: 19, color: CSS.cream });
-    label(this, W / 2, top + 177, `Start level ${this.levelIndex + 1} fresh with ${LIVES.start} hearts.\nYour unlocked levels and records are safe.`, { size: 17, bold: false, color: CSS.soft, wrap: w - 52 });
-    button(this, W / 2, top + 274, w - 70, 60, 'RETRY LEVEL', () => this.goto('Play', { levelIndex: this.levelIndex }), { primary: true });
+    label(this, W / 2, top + 177, `Start a new run with ${LIVES.start} hearts.\nYour unlocked levels and records are safe.`, { size: 17, bold: false, color: CSS.soft, wrap: w - 52 });
+    button(this, W / 2, top + 274, w - 70, 60, 'NEW RUN', () => this.goto('Play', { levelIndex: 0 }), { primary: true });
     button(this, W / 2, top + 348, w - 70, 50, 'TITLE / CALM MODE', () => this.goto('Title'), { size: 18 });
-    this.input.keyboard.on('keydown-ENTER', () => this.goto('Play', { levelIndex: this.levelIndex }));
-    this.input.keyboard.on('keydown-R', () => this.goto('Play', { levelIndex: this.levelIndex }));
+    this.input.keyboard.on('keydown-ENTER', () => this.goto('Play', { levelIndex: 0 }));
+    this.input.keyboard.on('keydown-R', () => this.goto('Play', { levelIndex: 0 }));
   }
   goto(key, data) { this.scene.stop('Play'); this.scene.start(key, data); }
 }

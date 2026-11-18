@@ -1,8 +1,9 @@
 // ============================================================================
 //  TitleScene.js: the start screen
 // ============================================================================
+import { challenge } from '../fieldwork.js';
 import Phaser from 'phaser';
-import { CSS, GAME_TITLE, GAME_SUBTITLE } from '../config.js';
+import { CHARACTERS, CSS, GAME_TITLE, GAME_SUBTITLE } from '../config.js';
 import { label, button, menuBackground, restartOnResize } from '../ui/widgets.js';
 import { Save } from '../systems/save.js';
 import { Sound } from '../systems/sound.js';
@@ -46,7 +47,7 @@ export class TitleScene extends Phaser.Scene {
     y += portrait ? 66 : 52;
     label(this, W / 2, y, GAME_SUBTITLE.toUpperCase(), { size: portrait ? 20 : 18, color: CSS.cream, letterSpacing: 3 });
     y += portrait ? 40 : 30;
-    label(this, W / 2, y, 'Guide a spark of light through a research maze lost in fog.', {
+    label(this, W / 2, y, 'Six mazes. Five neighbors. One question about depression.', {
       size: 17,
       color: CSS.muted,
       bold: false,
@@ -64,12 +65,11 @@ export class TitleScene extends Phaser.Scene {
     const toggles = [
       { key: 'muted', on: () => !s.muted, text: (on) => `SOUND ${on ? 'ON' : 'OFF'}`, act: () => Sound.toggleMute() },
       { key: 'calm', on: () => s.calm, text: (on) => `CALM ${on ? 'ON' : 'OFF'}`, act: () => Save.setSetting('calm', !s.calm) },
-      { key: 'ghost', on: () => s.ghost, text: (on) => `GHOST ${on ? 'ON' : 'OFF'}`, act: () => Save.setSetting('ghost', !s.ghost) },
     ];
     const bw = portrait ? 156 : 160;
     const toggleY = y;
     toggles.forEach((t, i) => {
-      const bx = W / 2 + (i - (portrait ? 1 : 1.5)) * (bw + 12);
+      const bx = W / 2 + (i - (portrait ? 0.5 : 1)) * (bw + 12);
       const b = button(this, bx, y, bw, 52, t.text(t.on()), () => {
         t.act();
         b.text.setText(t.text(t.on()));
@@ -81,10 +81,10 @@ export class TitleScene extends Phaser.Scene {
     this.updateHelp();
 
     // Character choice: under the toggles on phones, beside them on wide screens
-    const who = s.character ? s.character.toUpperCase() : 'CHOOSE';
+    const who = s.badge ? 'BADGE' : 'CHOOSE';
     const pickChar = () => this.scene.start('CharacterSelect', { returnTo: 'Title' });
     if (portrait) button(this, W / 2, y + 62, 280, 46, `PLAYER: ${who}`, pickChar, { size: 17 });
-    else button(this, W / 2 + 1.5 * (bw + 12), toggleY, bw, 52, who, pickChar, { size: 17, icon: s.character ? `face-${s.character}` : null, iconSize: 34 });
+    else button(this, W / 2 + (bw + 12), toggleY, bw, 52, who, pickChar, { size: 17, icon: s.character ? `face-${s.character}` : null, iconSize: 34 });
 
     // ---- How to play + footer --------------------------------------------------------------
     const how = isTouchDevice()
@@ -109,15 +109,16 @@ export class TitleScene extends Phaser.Scene {
     const s = Save.settings;
     const lines = [];
     if (s.calm) lines.push('Calm mode: unlimited lives, slower Static, and light never runs out.');
-    else lines.push('Calm mode slows everything down. Ghost shows your best route.');
+    else lines.push('Three hearts for the run. Find heart pickups to earn extra lives.');
     this.help.setText(lines.join(' '));
   }
 
   play() {
     Sound.unlock();
-    if (!Save.settings.character) { this.scene.start('CharacterSelect'); return; }
-    // First time? Jump straight into level 1. Otherwise pick a level.
-    if (Save.unlocked <= 1 && !Save.level('seed')) this.scene.start('Play', { levelIndex: 0 });
-    else this.scene.start('LevelSelect');
+    if (Save.settings.badge && CHARACTERS.some(c => c.id === Save.settings.character)) {
+      this.scene.start('Play', { levelIndex: 0 });
+      return;
+    }
+    this.scene.start('CharacterSelect', { returnTo: null });
   }
 }
