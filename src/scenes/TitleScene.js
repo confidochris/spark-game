@@ -3,7 +3,7 @@
 // ============================================================================
 import { challenge } from '../fieldwork.js';
 import Phaser from 'phaser';
-import { CSS, GAME_TITLE, GAME_SUBTITLE } from '../config.js';
+import { CHARACTERS, CSS, GAME_TITLE, GAME_SUBTITLE } from '../config.js';
 import { label, button, menuBackground, restartOnResize } from '../ui/widgets.js';
 import { Save } from '../systems/save.js';
 import { Sound } from '../systems/sound.js';
@@ -115,6 +115,10 @@ export class TitleScene extends Phaser.Scene {
 
   play() {
     Sound.unlock();
-    this.scene.start('CharacterSelect');
+    if (Save.settings.badge && CHARACTERS.some(c => c.id === Save.settings.character)) {
+      this.scene.start('Play', { levelIndex: 0 });
+      return;
+    }
+    this.scene.start('CharacterSelect', { returnTo: null });
   }
 }
