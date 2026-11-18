@@ -94,7 +94,7 @@ export class LevelCompleteScene extends Phaser.Scene {
 
     // ---- Story card -------------------------------------------------------------------
     let sy = portrait ? y : 92;
-    const story = level.story;
+    const story = { ...level.story, text: level.story.text + (r.distinction ? '\n\n✦ ' + r.distinction : '') };
     const cardX = rightX - colW / 2;
     const text = label(this, rightX, 0, story.text, { size: 18, color: CSS.soft, bold: false, wrap: colW - 44, align: 'left', lineSpacing: 6 }).setDepth(2);
     const cardH = text.height + 110;

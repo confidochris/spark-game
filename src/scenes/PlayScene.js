@@ -1,5 +1,6 @@
 import { beginStudy, choice, recordPath } from '../fieldwork.js';
-import { researchCheckpoint } from '../ui/researchCheckpoint.js';
+import { Study, instructions, records, honors } from '../game/Study.js';
+import { evidencePanel } from '../ui/evidence.js';
 import { sized } from '../systems/textures.js';
 // ============================================================================
 //  PlayScene.js: one level of the game
@@ -79,17 +80,19 @@ export class PlayScene extends Phaser.Scene {
     this.totalGifts = this.maze.gifts.length;
     this.buildExit();
     this.trail.set('start', [this.maze.start.x, this.maze.start.y]);
-    this.sampleDelay = 0;
-    this.fieldStep = 0;
-    this.station = null;
-    const stations = {
-      test: [this.maze.start, choice(1) ? this.maze.gifts[0] : this.maze.start],
-      discovery: [this.maze.clues[0], choice(2) ? this.maze.clues[1] : this.maze.clues[0]],
-      impact: [choice(3) ? this.maze.gifts[1] : this.maze.gifts[0]],
-      next: [choice(4) ? this.maze.clues.at(-1) : this.maze.gifts[0]],
-    };
-    this.fieldSites = stations[level.id] || [];
-    if (this.fieldSites.length) this.markStation();
+    this.study = new Study(this.levelIndex, this.maze, choice(this.levelIndex - 1));
+    this.siteLabels = new Map();
+    for (const site of this.study.sites) {
+      const pos = this.maze.toPixel(site.at.x,site.at.y);
+      const badge = label(this,pos.x,pos.y - 12,site.name,{size:12,color:CSS.cream});
+      badge.setBackgroundColor('#12553a').setPadding(3).setDepth(12);
+      this.siteLabels.set(site.id,badge);
+    }
+    if (!this.levelIndex) {
+      const pos = this.maze.toPixel(this.maze.exit.x,this.maze.exit.y);
+      this.windows = Array.from({length:5},(_,i) => this.add.rectangle(pos.x - 20 + i*10,pos.y - 26,8,12,0x294a38).setStrokeStyle(1,COLORS.gold).setDepth(12));
+      label(this,pos.x,pos.y + 23,'LAB',{size:12,color:CSS.gold}).setDepth(12);
+    }
 
     this.player = new Player(this, this.maze, this.maze.start.x, this.maze.start.y);
     if (this.calm) this.player.speed *= PLAYER.calmSpeedFactor;
@@ -118,6 +121,8 @@ export class PlayScene extends Phaser.Scene {
 
     // ---- Controls ---------------------------------------------------------------
     this.setupKeyboard();
+    this.input.keyboard.on('keydown-N', () => this.openNotes());
+    this.surgeLabel = label(this,0,0,'',{size:13,color:CSS.sky}).setDepth(15);
     this.touch = new TouchControls(this, {
       onHold: (dir) => {
         this.padDir = dir;
@@ -141,6 +146,10 @@ export class PlayScene extends Phaser.Scene {
     this.updateCamera(1);
 
     this.showIntro();
+    if (this.levelIndex === 2) this.time.delayedCall(0, () => this.openNotes('Four fictional records', {
+      note:'Three diaries show a sleep change before symptoms returned. Inspect the dates, then choose a lead.',
+      cards:records,
+    }));
     Sound.startMusic();
 
     // Pause automatically if the player switches tabs
@@ -286,6 +295,7 @@ export class PlayScene extends Phaser.Scene {
     // Row 2: goal and best time
     const row2 = this.portrait ? 80 : 78;
     this.goalText = add(label(this, 14, row2, '', { size: 16, originX: 0, color: CSS.soft, letterSpacing: 1 }));
+    this.goalText.setInteractive({useHandCursor:true}).on('pointerup', () => this.openNotes());
     const bestStr = this.calm ? 'CALM MODE' : `BEST ${formatTime(this.bestTime)}`;
     add(label(this, W - 14, row2, bestStr, { size: 16, originX: 1, color: CSS.lime, letterSpacing: 1 }));
 
@@ -323,7 +333,7 @@ export class PlayScene extends Phaser.Scene {
     const player = this.player;
 
     if (this.state === 'playing') {
-      this.sampleDelay = Math.max(0, this.sampleDelay - dt);
+
       this.surge = Math.max(0, this.surge - dt);
       player.hold(this.heldDirection());
       player.update(dt);
@@ -373,7 +383,7 @@ export class PlayScene extends Phaser.Scene {
     const p = this.maze.toPixel(x, y);
 
     this.trail.set(key, [x,y]);
-    this.readStation(x,y);
+
 
     // Data dot
     const dot = this.maze.dots.get(key);
@@ -406,6 +416,7 @@ export class PlayScene extends Phaser.Scene {
       this.tweens.killTweensOf(gift.sprite);
       this.tweens.add({ targets: gift.sprite, scale: 1.8, alpha: 0, duration: 260, onComplete: () => gift.sprite.destroy() });
       this.giftsFound++;
+      if (!this.levelIndex) this.windows[this.giftsFound - 1].setFillStyle(COLORS.gold);
       this.score += SCORE.gift;
       this.light = Math.min(this.lightCfg.max, this.light + this.lightCfg.giftRefill);
       this.burst(p.x, p.y, COLORS.gold, 14);
@@ -413,7 +424,7 @@ export class PlayScene extends Phaser.Scene {
       Sound.gift();
       if (this.level.id === 'seed' && this.giftsFound === this.totalGifts) {
         this.beaconLit = true;
-        this.observe();
+        this.unlockExit();
       }
     }
 
@@ -431,55 +442,38 @@ export class PlayScene extends Phaser.Scene {
       this.floatText(p.x, p.y - 20, `DISCOVERY ${this.cluesFound}/${this.totalClues}`, CSS.lime);
       Sound.discovery();
       this.openGates();
-      if (this.level.id === 'test' && this.cluesFound === 1) this.observe();
-      if (this.cluesFound >= this.totalClues && this.fieldStep === this.fieldSites.length && (this.level.id !== 'seed' || this.beaconLit)) this.unlockExit();
     }
+    const site = this.study.sites.find(s => s.at.x === x && s.at.y === y);
+    if (site) {
+      const info = this.study.inspect(site.id);
+      if (info) this.openNotes(site.name,info);
+    }
+    this.checkStudyExit();
 
     // The keyhole
     const e = this.maze.exit;
     if (e.open && x === e.x && y === e.y) this.win();
   }
 
-  observe() {
+  checkStudyExit() {
+    if (this.levelIndex && !this.maze.exit.open && this.study.solved && this.cluesFound === this.totalClues) this.unlockExit();
+  }
+
+  openNotes(title = 'Field notebook', info = null) {
+    if (this.state !== 'playing') return;
     this.touch.release();
     this.padDir = null;
     this.state = 'observing';
     this.scene.pause();
-    researchCheckpoint(this.level.id, () => {
+    const notes = [...(this.levelIndex === 2 ? records : []), ...this.study.notes];
+    this.noteBox = evidencePanel(title, info || {note:instructions[this.levelIndex],cards:notes,allowGiving:true}, () => {
+      this.noteBox = null;
       this.state = 'playing';
       this.scene.resume();
-      const target = this.maze.clues.find(c => !c.taken) || this.maze.exit;
-      const point = this.maze.toPixel(target.x, target.y);
-      this.fog.reveal(point.x, point.y, this.lightCfg.max);
-      this.burst(point.x, point.y, COLORS.gold, 20);
-      if (this.cluesFound === this.totalClues && this.fieldStep === this.fieldSites.length) this.unlockExit();
-      else this.toast('BEACON ONLINE • A NEW AREA IS LIT');
+      for (const [id, badge] of this.siteLabels) if (this.study.items.has(id)) badge.setAlpha(0.45);
+      if (this.levelIndex === 4) this.study.solved = ['east','west','home'].every(id => this.study.items.has(id));
+      this.checkStudyExit();
     });
-  }
-
-  markStation() {
-    this.station?.destroy();
-    const site = this.fieldSites[this.fieldStep];
-    if (!site) return;
-    const p = this.maze.toPixel(site.x, site.y);
-    this.station = this.add.circle(p.x, p.y, 18, COLORS.sky, 0.18).setStrokeStyle(3, COLORS.sky).setDepth(11);
-    if (this.level.id === 'next') this.lightCfg.giftRefill += 15;
-  }
-
-  readStation(x, y) {
-    const site = this.fieldSites[this.fieldStep];
-    if (!site || x !== site.x || y !== site.y) return;
-    if (this.sampleDelay > 0) {
-      this.toast('RECALIBRATING • RETURN IN ' + Math.ceil(this.sampleDelay) + 's');
-      return;
-    }
-    this.fieldStep++;
-    if (this.fieldSites[this.fieldStep] === site) this.sampleDelay = 4;
-    this.markStation();
-    this.light = this.lightCfg.max;
-    this.burst(this.player.x, this.player.y, COLORS.sky, 18);
-    this.toast(this.fieldStep < this.fieldSites.length ? 'SAMPLE SAVED • TAKE ANOTHER READING' : 'OBSERVATION COMPLETE');
-    if (this.fieldStep === this.fieldSites.length && this.cluesFound === this.totalClues && !this.maze.exit.open) this.unlockExit();
   }
 
   openGates() {
@@ -664,9 +658,10 @@ export class PlayScene extends Phaser.Scene {
       ? 'GOAL: REACH THE KEYHOLE'
       : `GOAL: FIND ${this.totalClues - this.cluesFound} MORE ${this.totalClues - this.cluesFound === 1 ? 'DISCOVERY' : 'DISCOVERIES'}`;
     if (this.level.id === 'seed' && !this.beaconLit ) goal = 'GIFTS FOR THE LAB • ' + this.giftsFound + '/5';
-    if (this.fieldStep < this.fieldSites.length) goal = 'VISIT BLUE RING • ' + this.fieldStep + '/' + this.fieldSites.length;
-    if (this.sampleDelay > 0) goal = 'NEXT SAMPLE IN ' + Math.ceil(this.sampleDelay) + 's';
-    if (this.surge > 0) goal = 'TAG STATIC • ' + Math.ceil(this.surge) + 's';
+    if (!this.study.solved) goal = this.study.objective;
+    if (!this.levelIndex && this.beaconLit) goal = 'Enter the lit lab';
+    this.surgeLabel.setPosition(this.player.x,this.player.y - 32).setText(this.surge > 0 ? 'SURGE ' + Math.ceil(this.surge) + 's' : '');
+    goal = '▤ ' + goal;
     set('goal', goal, (v) => this.goalText.setText(v).setColor(this.maze.exit.open ? CSS.gold : CSS.soft));
 
     // light meter
@@ -732,14 +727,7 @@ export class PlayScene extends Phaser.Scene {
     objs.push(g);
     objs.push(label(this, W / 2, cy - 56, `LEVEL ${this.levelIndex + 1} · ${this.level.stage}`, { size: 15, color: CSS.lime, letterSpacing: 2 }));
     objs.push(label(this, W / 2, cy - 26, this.level.name, { size: 28, heading: true, color: CSS.cream }));
-    objs.push(label(this, W / 2, cy + 18, ([
-      this.level.tip,
-      choice(0) ? 'Reserve battery equipped. Take the longer route for a heart.' : 'Wide lens equipped. Watch for Static beyond the next corner.',
-      choice(1) ? 'Visit the blue base ring, then carry your reading to the distant ring.' : 'Visit the blue base ring twice. Leave and circle back for a second sample.',
-      choice(2) ? 'Visit both blue instruments to compare readings.' : 'Visit the blue instrument twice to replay its original reading.',
-      choice(3) ? 'Fictional participant: “Getting to work was the hard part.” Trace the commute to the blue ring.' : 'Fictional participant: “Mornings were the hardest.” Find the blue ring at the early field station.',
-      choice(4) ? 'Your beacon lights the final station. Visit its ring for a full recharge.' : 'Your beacon lights the crossing. Visit its ring for a full recharge.',
-    ])[this.levelIndex], { size: 17, color: CSS.soft, wrap: w - 40, bold: false }));
+    objs.push(label(this, W / 2, cy + 18, instructions[this.levelIndex], { size: 17, color: CSS.soft, wrap: w - 40, bold: false }));
     objs.push(
       label(this, W / 2, cy + 64, touch ? 'SWIPE OR USE THE PAD TO START' : 'PRESS AN ARROW KEY TO START', {
         size: 14,
@@ -751,7 +739,7 @@ export class PlayScene extends Phaser.Scene {
     this.intro = objs;
     this.introGone = false;
     // fade it after a few seconds even if you haven't moved yet
-    this.time.delayedCall(4500, () => this.hideIntro());
+
   }
 
   hideIntro() {
@@ -772,7 +760,8 @@ export class PlayScene extends Phaser.Scene {
     const stars = [true, this.giftsFound >= this.totalGifts, time <= this.par];
     const starCount = stars.filter(Boolean).length;
     const timeBonus = Math.round(Math.max(0, this.par - time) * SCORE.timeBonusPerSecond);
-    this.score += timeBonus;
+    const distinction = this.study.distinction(this.cluesFound) ? honors[this.levelIndex] : '';
+    this.score += timeBonus + (distinction ? 500 : 0);
 
     const result = {
       id: this.level.id,
@@ -782,7 +771,7 @@ export class PlayScene extends Phaser.Scene {
       score: this.score,
       calm: this.calm,
     };
-    recordPath(this.levelIndex, Array.from(this.trail.values()));
+    recordPath(this.levelIndex, Array.from(this.trail.values()), this.study.notes, distinction);
     const records = Save.recordRun(result);
     if (!this.calm && this.levelIndex === LEVELS.length - 1) Save.finishRun();
 
@@ -803,6 +792,7 @@ export class PlayScene extends Phaser.Scene {
         stars,
         score: this.score,
         timeBonus,
+        distinction,
         dots: this.dotsEaten,
         gifts: this.giftsFound,
         totalGifts: this.totalGifts,
@@ -833,6 +823,8 @@ export class PlayScene extends Phaser.Scene {
   }
 
   cleanup() {
+    this.noteBox?.remove();
+    this.noteBox = null;
     this.scale.off('resize', this.onResize);
     this.game.events.off('hidden', this.onHidden);
     this.touch.destroy();

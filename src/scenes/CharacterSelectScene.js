@@ -33,7 +33,7 @@ export class CharacterSelectScene extends Phaser.Scene {
       Save.setSetting('badge',name); Save.setSetting('character',picked.id);
       if (data?.returnTo) { this.scene.start(data.returnTo); return; }
       dialog.replaceChildren();
-      const art = add('img',''); art.className = 'story-frame'; art.src = 'story/kitchen.webp'; art.alt = 'Maya photographing dinner beside her dad';
+      const art = add('img',''); art.className = 'story-frame'; art.src = 'story/kitchen.webp'; art.alt = 'Maya sharing dinner photos with her dad by phone';
       add('small','A fictional North Carolina community');
       add('h2','Maya’s kitchen');
       add('p','“Dad and I traded dinner photos. When my depression came back, I stopped sending mine. He noticed before I did.”');

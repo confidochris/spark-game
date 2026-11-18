@@ -62,7 +62,7 @@ export const LEVELS = [
   {
     id: 'pilot',
     stage: 'PILOT',
-    name: 'The First Investment',
+    name: 'The Paired Diaries',
     par: 40,
     tip: 'Gold gifts refill light. Grab a key, then tag Static before your surge ends.',
     light: { fadePerSecond: 6 },
@@ -97,7 +97,7 @@ export const LEVELS = [
   {
     id: 'test',
     stage: 'TESTING',
-    name: 'Putting It to the Test',
+    name: 'The Fourth Record',
     par: 45,
     tip: 'Find a key to sample the signals. Test which pattern repeats.',
     light: { fadePerSecond: 6.8 },
@@ -134,7 +134,7 @@ export const LEVELS = [
   {
     id: 'discovery',
     stage: 'EVIDENCE',
-    name: 'A New Discovery',
+    name: 'Defend the Pilot',
     par: 48,
     tip: 'Doors and Static together now. Time your dash, or take the long way.',
     light: { fadePerSecond: 7.4 },
@@ -169,7 +169,7 @@ export const LEVELS = [
   {
     id: 'impact',
     stage: 'NIH FUNDING',
-    name: 'Greater Impact',
+    name: 'Across Three Labs',
     par: 72,
     tip: 'Numbered gates open when you hold that many discoveries.',
     light: { fadePerSecond: 8 },
@@ -208,7 +208,7 @@ export const LEVELS = [
   {
     id: 'next',
     stage: 'DISCOVERY',
-    name: 'The Next Question',
+    name: 'The Missing Signal',
     par: 50,
     tip: 'The keyhole waits in the center. Find all 4 discoveries to open the way.',
     light: { fadePerSecond: 8.5 },
