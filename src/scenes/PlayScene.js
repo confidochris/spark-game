@@ -107,7 +107,7 @@ export class PlayScene extends Phaser.Scene {
     // Ghost of your best run (if you have one and the option is on)
     this.recorder = new GhostRecorder();
     const best = Save.level(level.id);
-    this.ghost = Save.settings.ghost && best?.ghost?.length > 4 && !this.calm ? new GhostPlayer(this, best.ghost) : null;
+    this.ghost = Save.settings.raceBest && best?.ghost?.length > 4 && !this.calm ? new GhostPlayer(this, best.ghost) : null;
     this.bestTime = best?.bestTime ?? null;
 
     // Sparkle particles (for pickups)

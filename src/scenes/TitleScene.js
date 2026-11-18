@@ -65,7 +65,7 @@ export class TitleScene extends Phaser.Scene {
     const toggles = [
       { key: 'muted', on: () => !s.muted, text: (on) => `SOUND ${on ? 'ON' : 'OFF'}`, act: () => Sound.toggleMute() },
       { key: 'calm', on: () => s.calm, text: (on) => `CALM ${on ? 'ON' : 'OFF'}`, act: () => Save.setSetting('calm', !s.calm) },
-      { key: 'ghost', on: () => s.ghost, text: (on) => `GHOST ${on ? 'ON' : 'OFF'}`, act: () => Save.setSetting('ghost', !s.ghost) },
+      { key: 'raceBest', on: () => s.raceBest, text: (on) => `RACE BEST ${on ? 'ON' : 'OFF'}`, act: () => Save.setSetting('raceBest', !s.raceBest) },
     ];
     const bw = portrait ? 156 : 160;
     const toggleY = y;

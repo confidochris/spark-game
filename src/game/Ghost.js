@@ -1,5 +1,4 @@
 import { sized } from '../systems/textures.js';
-import { Save } from '../systems/save.js';
 // ============================================================================
 //  Ghost.js: records your route, and replays your best one
 // ----------------------------------------------------------------------------
@@ -31,7 +30,7 @@ export class GhostPlayer {
   constructor(scene, points) {
     this.points = points;
     this.time = 0;
-    this.sprite = sized(scene.add.image(points[0], points[1], `face-${Save.settings.character || 'chris'}`), 34).setDepth(11.5).setAlpha(0.35);
+    this.sprite = sized(scene.add.image(points[0], points[1], 'spark'), 19).setDepth(6.5).setTint(0x6ed0e8).setAlpha(0.55);
   }
   update(dt, running) {
     if (!running) return;

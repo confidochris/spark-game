@@ -13,7 +13,7 @@ const DEFAULTS = {
   run: null,
   unlocked: 1, // how many levels are open (1 = only the first)
   levels: {}, // per level id: { stars, bestTime, bestScore, ghost }
-  settings: { muted: false, calm: false, ghost: true, character: null },
+  settings: { muted: false, calm: false, raceBest: false, character: null },
 };
 
 let data = load();
