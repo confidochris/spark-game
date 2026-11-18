@@ -95,7 +95,7 @@ export const LIVES = {
 // ---- Characters ----------------------------------------------------------------
 // Pictures live in public/characters/. To swap a face, replace the PNG
 // (square, transparent background, 256x256 is plenty) and keep the file name.
-export const CHARACTERS = ['Dark hair and glasses', 'Sand-colored hijab', 'Silver hair and beard', 'Silver bob and glasses', 'Locs and lab coat', 'Red hair and denim'].map((name, i) => ({
+export const CHARACTERS = ['Dark hair and glasses', 'Sand-colored hijab', 'Silver hair and beard', 'Silver bob and glasses', 'Locs and lab coat', 'Red hair and denim', 'Natural curls and berry blouse', 'Silver curls and gold cardigan', 'Blonde waves and navy shirt'].map((name, i) => ({
   id: 'researcher' + i, name, file: 'characters/researcher' + i + '.webp',
 }));
 export const FACE_SIZE = 38; // how big the face is in the maze (a square is 40)
