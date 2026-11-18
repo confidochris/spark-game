@@ -16,11 +16,12 @@ export function researchCheckpoint(level, resume) {
     return button;
   }
   function finish() {
+    action('Return to the maze', () => dialog.close()).focus();
     const link = add('a', 'Give to real research ↗');
+    link.className = 'donation-link';
     link.href = GIVE_URL;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    action('Return to the maze', () => dialog.close()).focus();
   }
   const heading = add('h2', level === 'seed' ? 'Your community lit a beacon' : 'Which signal holds up?');
   heading.id = 'station-heading';

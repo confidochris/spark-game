@@ -62,3 +62,17 @@ canvas {
 .mentor img:first-of-type { width: 90px; float: right; margin: 0 0 8px 12px; }
 .mentor img:nth-of-type(2) { width: 42px; }
 .mentor canvas { width: 100%; height: auto; }
+
+.research-station a.donation-link {
+  width: fit-content;
+  max-width: 100%;
+  margin: .65rem auto 0;
+  padding: .55rem .75rem;
+  border: 0;
+  background: transparent;
+  color: #bdcfc2;
+  font-size: .875rem;
+  text-underline-offset: .2em;
+}
+.research-station .donation-link:hover,
+.research-station .donation-link:focus-visible { color: #fff8e6; }

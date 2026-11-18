@@ -43,9 +43,10 @@ export class MentorScene extends Phaser.Scene {
         }
       });
       const shareStatus = add('small', ''); shareStatus.setAttribute('role','status');
-      const give = add('a', 'Fund real mental illness research ↗');
-      give.href = GIVE_URL; give.target = '_blank'; give.rel = 'noopener';
       act('Continue to results', () => this.scene.start('End'));
+      const give = add('a', 'Fund real mental illness research ↗');
+      give.className = 'donation-link';
+      give.href = GIVE_URL; give.target = '_blank'; give.rel = 'noopener';
     };
     dialog.showModal();
     if (poster) { showPoster(); return; }

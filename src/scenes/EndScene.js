@@ -62,13 +62,12 @@ export class EndScene extends Phaser.Scene {
     y += ch + (portrait ? 46 : 38);
 
     // ---- Give (gentle, optional) and play again ------------------------------------------------------------
-    button(this, W / 2, y, Math.min(W - 40, 440), 64, REAL_STORY.cta.toUpperCase(), () => this.give(), { primary: true, size: 20 });
-    y += portrait ? 46 : 42;
-    label(this, W / 2, y, REAL_STORY.note, { size: 15, color: CSS.muted, bold: false });
-    y += portrait ? 54 : 46;
     const half = Math.min((W - 52) / 2, 200);
-    button(this, W / 2 - half / 2 - 6, y, half, 54, 'PLAY AGAIN', () => this.scene.start('LevelSelect'), { size: 18 });
+    button(this, W / 2 - half / 2 - 6, y, half, 54, 'PLAY AGAIN', () => this.scene.start('LevelSelect'), { primary: true, size: 18 });
     this.copyBtn = button(this, W / 2 + half / 2 + 6, y, half, 54, 'MY POSTER', () => this.scene.start('Mentor', { levelIndex: 5, poster: true }), { size: 18 });
+    y += 60;
+    const donate = label(this, W / 2, y, 'Support mental illness research ↗', { size: 16, color: CSS.muted, bold: false });
+    donate.setPadding(8).setInteractive({ useHandCursor: true }).on('pointerup', () => this.give());
     this.shift = centerVertically(this, first, heroY - (portrait ? 130 : 86), y + 30);
     this.input.keyboard.on('keydown-ENTER', () => this.scene.start('LevelSelect'));
   }
