@@ -18,7 +18,6 @@ import { Maze, DIRS } from '../game/Maze.js';
 import { Player } from '../game/Player.js';
 import { Fog } from '../game/Fog.js';
 import { StaticBlob } from '../game/StaticBlob.js';
-import { GhostRecorder, GhostPlayer } from '../game/Ghost.js';
 import { TouchControls } from '../ui/TouchControls.js';
 import { label, panel } from '../ui/widgets.js';
 import { Save } from '../systems/save.js';
@@ -104,10 +103,7 @@ export class PlayScene extends Phaser.Scene {
     this.fog = new Fog(this, this.maze, this.lightCfg);
     this.fog.reveal(this.player.x, this.player.y, this.light);
 
-    // Ghost of your best run (if you have one and the option is on)
-    this.recorder = new GhostRecorder();
     const best = Save.level(level.id);
-    this.ghost = Save.settings.raceBest && best?.ghost?.length > 4 && !this.calm ? new GhostPlayer(this, best.ghost) : null;
     this.bestTime = best?.bestTime ?? null;
 
     // Sparkle particles (for pickups)
@@ -335,7 +331,6 @@ export class PlayScene extends Phaser.Scene {
 
       if (player.moved) {
         this.elapsed += dt;
-        this.recorder.update(dt, player.x, player.y);
         // The light slowly fades as you explore (Calm mode: half as fast)
         // The light drains as you explore. Calm mode: slower, and it never runs out.
         const cfg = this.lightCfg;
@@ -352,7 +347,6 @@ export class PlayScene extends Phaser.Scene {
         }
         if (this.intro && !this.introGone) this.hideIntro();
       }
-      if (this.ghost) this.ghost.update(dt, player.moved);
 
       if (player.moved) this.statics.forEach((s) => s.update(dt));
       this.checkStatic();
@@ -786,7 +780,6 @@ export class PlayScene extends Phaser.Scene {
       time,
       stars: starCount,
       score: this.score,
-      ghost: this.recorder.data(),
       calm: this.calm,
     };
     recordPath(this.levelIndex, Array.from(this.trail.values()));

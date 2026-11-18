@@ -65,12 +65,11 @@ export class TitleScene extends Phaser.Scene {
     const toggles = [
       { key: 'muted', on: () => !s.muted, text: (on) => `SOUND ${on ? 'ON' : 'OFF'}`, act: () => Sound.toggleMute() },
       { key: 'calm', on: () => s.calm, text: (on) => `CALM ${on ? 'ON' : 'OFF'}`, act: () => Save.setSetting('calm', !s.calm) },
-      { key: 'raceBest', on: () => s.raceBest, text: (on) => `RACE BEST ${on ? 'ON' : 'OFF'}`, act: () => Save.setSetting('raceBest', !s.raceBest) },
     ];
     const bw = portrait ? 156 : 160;
     const toggleY = y;
     toggles.forEach((t, i) => {
-      const bx = W / 2 + (i - (portrait ? 1 : 1.5)) * (bw + 12);
+      const bx = W / 2 + (i - (portrait ? 0.5 : 1)) * (bw + 12);
       const b = button(this, bx, y, bw, 52, t.text(t.on()), () => {
         t.act();
         b.text.setText(t.text(t.on()));
@@ -85,7 +84,7 @@ export class TitleScene extends Phaser.Scene {
     const who = s.badge ? 'BADGE' : 'CHOOSE';
     const pickChar = () => this.scene.start('CharacterSelect', { returnTo: 'Title' });
     if (portrait) button(this, W / 2, y + 62, 280, 46, `PLAYER: ${who}`, pickChar, { size: 17 });
-    else button(this, W / 2 + 1.5 * (bw + 12), toggleY, bw, 52, who, pickChar, { size: 17, icon: s.character ? `face-${s.character}` : null, iconSize: 34 });
+    else button(this, W / 2 + (bw + 12), toggleY, bw, 52, who, pickChar, { size: 17, icon: s.character ? `face-${s.character}` : null, iconSize: 34 });
 
     // ---- How to play + footer --------------------------------------------------------------
     const how = isTouchDevice()

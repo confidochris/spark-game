@@ -4,7 +4,7 @@ Your gold dot is now a full game. It has six levels, a title screen, stars, soun
 
 ## New in version 2
 
-- **Play as Chris or Shelley.** Pick a face the first time you press START, or later with the **PLAYER** button on the title screen. The face replaces the gold dot, with a gold glow and rim, and it bobs gently as it moves. Your ghost uses the same face, see-through.
+- **Play as Chris or Shelley.** Pick a face the first time you press START, or later with the **PLAYER** button on the title screen. The face replaces the gold dot, with a gold glow and rim, and it bobs gently as it moves.
 - **3 lives (hearts).** Touching Static or running out of light costs a heart. Spark flashes and goes back to the level's start. At 0 hearts you get a **Try again** screen, and can start a new run.
 - **Harder from level 2.** The light really runs out now. Level 2 adds the first slow Static and a Closing Door. Levels 3 to 6 add more and faster Static, and their par times are tighter. Level 1 is still easy.
 - **Sharp graphics.** The game now draws at your screen's real resolution (Retina too), so text, icons and faces stay crisp.
@@ -37,7 +37,7 @@ This guide covers:
 
 `index.html`, `package.json`, `package-lock.json` and `vite.config.js` didn't change. Copying them again is harmless. You don't need to run `npm install` again, so just run `npm run dev`.
 
-Your saved progress and stars carry over. Because some mazes changed, old ghost routes are cleared once.
+Your saved progress and stars carry over.
 
 **First time setting up?** Follow the steps below. You only have to do this once.
 
@@ -103,7 +103,6 @@ You're **Spark**, a point of light exploring a research maze hidden in fog.
 - **Numbered gates** open once you hold that many discoveries.
 - **Places you've already lit stay a little brighter**, so you can remember the way.
 - **Stars:** ★ finish the level · ★ collect all 3 gifts · ★ beat the par time
-- **Ghost:** after you set a best time, a see-through copy of your character replays your best route so you can race yourself.
 - **Calm mode** (title screen): everything runs at 70% speed, you have unlimited lives, the light drains half as fast and never runs out, and the timer is hidden. The par time stretches to match.
 - **Character:** press START the first time (or PLAYER on the title screen) to choose Chris or Shelley. Your choice is saved.
 
@@ -118,7 +117,7 @@ You're **Spark**, a point of light exploring a research maze hidden in fog.
 
 Steering works a bit like Pac-Man. Tap a direction and Spark glides to the next place it could turn, then waits. Hold the direction to keep going. You can press your next turn early, and Spark takes it at the first chance. Because Spark moves square by square, it can't snag on corners.
 
-Progress (unlocked levels, stars, best times, ghosts and settings) saves in the browser automatically.
+Progress (unlocked levels, stars, best times and settings) saves in the browser automatically.
 
 ---
 
@@ -140,7 +139,7 @@ spark-game/
     ├── style.css           page styling around the game
     ├── scenes/             the "screens" of the game
     │   ├── BootScene.js          loads the faces, draws all other pictures, opens the title
-    │   ├── TitleScene.js         start screen and settings (Sound / Calm / Ghost / Player)
+    │   ├── TitleScene.js         start screen and settings (Sound / Calm / Player)
     │   ├── CharacterSelectScene.js  choose Chris or Shelley
     │   ├── TryAgainScene.js      shown when you run out of hearts
     │   ├── LevelSelectScene.js   pick a level
@@ -153,7 +152,6 @@ spark-game/
     │   ├── Player.js       Spark and its grid movement
     │   ├── Fog.js          the darkness and the circle of light
     │   ├── StaticBlob.js   the wandering "noisy data"
-    │   └── Ghost.js        records and replays your best route
     ├── systems/            helpers used everywhere
     │   ├── textures.js     draws every picture with code (no image files)
     │   ├── sound.js        makes every sound with code (no audio files)
